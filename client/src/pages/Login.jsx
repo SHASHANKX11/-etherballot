@@ -1,10 +1,18 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import FaceCapture from '../components/FaceCapture';
 import toast from 'react-hot-toast';
 import { HiOutlineLockClosed, HiOutlineDeviceMobile, HiOutlineCamera, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
+
+// ─── Framer Motion step card variants ────────────────────────────────────────
+const stepVariants = {
+  enter:  { x: 48,  opacity: 0, scale: 0.98 },
+  center: { x: 0,   opacity: 1, scale: 1,   transition: { type: 'spring', stiffness: 300, damping: 28 } },
+  exit:   { x: -48, opacity: 0, scale: 0.98, transition: { duration: 0.18 } }
+};
 
 const Login = () => {
   const navigate = useNavigate();
@@ -115,9 +123,11 @@ const Login = () => {
         ))}
       </div>
 
-      {/* Step 1: Aadhaar */}
+      {/* Animated Step Cards */}
+      <AnimatePresence mode="wait">
       {step === 1 && (
-        <div className="glass-card glass-card--no-hover animate-scale-in">
+        <motion.div key="step1" variants={stepVariants} initial="enter" animate="center" exit="exit"
+          className="glass-card glass-card--no-hover">
           <div className="flex items-center gap-sm mb-lg">
             <div className="feature-card__icon stat-card__icon--primary" style={{ width: 42, height: 42, marginBottom: 0 }}>
               <HiOutlineLockClosed size={22} />
@@ -144,9 +154,9 @@ const Login = () => {
             />
           </div>
 
-          <button 
-            className="btn btn-primary btn-lg btn-block" 
-            onClick={handleAadhaarSubmit} 
+          <button
+            className="btn btn-primary btn-lg btn-block"
+            onClick={handleAadhaarSubmit}
             disabled={loading || aadhaarNumber.length !== 12}
           >
             {loading ? 'Verifying on Ledger...' : 'Continue to OTP Verification →'}
@@ -160,12 +170,12 @@ const Login = () => {
               <HiOutlineShieldCheck /> Admin Portal
             </Link>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* Step 2: OTP */}
       {step === 2 && (
-        <div className="glass-card glass-card--no-hover animate-scale-in">
+        <motion.div key="step2" variants={stepVariants} initial="enter" animate="center" exit="exit"
+          className="glass-card glass-card--no-hover">
           <div className="flex items-center gap-sm mb-md">
             <div className="feature-card__icon stat-card__icon--info" style={{ width: 42, height: 42, marginBottom: 0 }}>
               <HiOutlineDeviceMobile size={22} />
@@ -230,12 +240,13 @@ const Login = () => {
           >
             {loading ? 'Verifying OTP...' : 'Verify & Proceed to Face Scan →'}
           </button>
-        </div>
+        </motion.div>
       )}
 
       {/* Step 3: Face Verification */}
       {step === 3 && (
-        <div className="glass-card glass-card--no-hover animate-scale-in">
+        <motion.div key="step3" variants={stepVariants} initial="enter" animate="center" exit="exit"
+          className="glass-card glass-card--no-hover">
           <div className="text-center mb-md">
             <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
               Biometric Liveness Verification
@@ -250,8 +261,9 @@ const Login = () => {
             onError={msg => toast.error(msg)}
             mode="verify"
           />
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

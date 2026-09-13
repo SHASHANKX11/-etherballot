@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import FaceCapture from '../components/FaceCapture';
@@ -13,6 +14,13 @@ import {
   HiOutlineDeviceMobile,
   HiOutlineShieldCheck
 } from 'react-icons/hi';
+
+// ─── Framer Motion step card variants ───────────────────────────────────────
+const stepVariants = {
+  enter:  { x: 56,  opacity: 0, scale: 0.97 },
+  center: { x: 0,   opacity: 1, scale: 1,   transition: { type: 'spring', stiffness: 280, damping: 26 } },
+  exit:   { x: -56, opacity: 0, scale: 0.97, transition: { duration: 0.16 } }
+};
 
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -202,9 +210,13 @@ const Register = () => {
         ))}
       </div>
 
+      {/* ─── Animated Step Cards ─── */}
+      <AnimatePresence mode="wait">
+
       {/* ═══ STEP 1: Aadhaar ═══ */}
       {step === 1 && (
-        <div className="glass-card glass-card--no-hover animate-scale-in">
+        <motion.div key="reg-step1" variants={stepVariants} initial="enter" animate="center" exit="exit"
+          className="glass-card glass-card--no-hover">
           <div className="flex items-center gap-sm mb-lg">
             <div className="feature-card__icon stat-card__icon--primary" style={{ width: 42, height: 42, marginBottom: 0 }}>
               <HiOutlineLockClosed size={22} />
@@ -243,12 +255,13 @@ const Register = () => {
           <p style={{ textAlign: 'center', marginTop: 'var(--space-xl)', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
             Already registered? <Link to="/login" style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>Sign In here</Link>
           </p>
-        </div>
+        </motion.div>
       )}
 
       {/* ═══ STEP 2: Personal Details & Location ═══ */}
       {step === 2 && (
-        <div className="glass-card glass-card--no-hover animate-scale-in">
+        <motion.div key="reg-step2" variants={stepVariants} initial="enter" animate="center" exit="exit"
+          className="glass-card glass-card--no-hover">
           <div className="flex items-center gap-sm mb-lg">
             <div className="feature-card__icon stat-card__icon--info" style={{ width: 42, height: 42, marginBottom: 0 }}>
               <HiOutlineUser size={22} />
@@ -393,12 +406,13 @@ const Register = () => {
           >
             Continue to Face Biometrics →
           </button>
-        </div>
+        </motion.div>
       )}
 
       {/* ═══ STEP 3: Face Capture ═══ */}
       {step === 3 && (
-        <div className="glass-card glass-card--no-hover animate-scale-in">
+        <motion.div key="reg-step3" variants={stepVariants} initial="enter" animate="center" exit="exit"
+          className="glass-card glass-card--no-hover">
           <div className="text-center mb-md">
             <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
               Step 3: Biometric Enrollment
@@ -412,12 +426,13 @@ const Register = () => {
             onError={(msg) => toast.error(msg)}
             mode="register"
           />
-        </div>
+        </motion.div>
       )}
 
       {/* ═══ STEP 4: Review & Confirm ═══ */}
       {step === 4 && (
-        <div className="glass-card glass-card--no-hover animate-scale-in">
+        <motion.div key="reg-step4" variants={stepVariants} initial="enter" animate="center" exit="exit"
+          className="glass-card glass-card--no-hover">
           <div className="flex items-center gap-sm mb-lg">
             <div className="feature-card__icon stat-card__icon--success" style={{ width: 42, height: 42, marginBottom: 0 }}>
               <HiOutlineShieldCheck size={24} />
@@ -451,8 +466,9 @@ const Register = () => {
           <button className="btn btn-success btn-lg btn-block" onClick={handleSubmit} disabled={loading}>
             {loading ? 'Submitting to Blockchain...' : '🗳️ Confirm & Issue Voting ID'}
           </button>
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 };

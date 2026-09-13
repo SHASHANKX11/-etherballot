@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 
@@ -16,11 +17,24 @@ const votingRoutes = require('./routes/voting');
 const Admin = require('./models/Admin');
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // ═══════════════════════════════════════════
 //  SECURITY: Disable fingerprinting
 // ═══════════════════════════════════════════
 app.disable('x-powered-by');
+
+// ═══════════════════════════════════════════
+//  PERFORMANCE: Gzip compression
+// ═══════════════════════════════════════════
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res);
+  },
+  level: 6 // Balanced between speed and compression ratio
+}));
 
 // ═══════════════════════════════════════════
 //  MIDDLEWARE
@@ -47,17 +61,16 @@ app.use(helmet({
   },
   referrerPolicy: { policy: "strict-origin-when-cross-origin" },
   noSniff: true,
-  xssFilter: true,
 }));
 
 // CORS (strict origin list)
 const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(',')
+  ? process.env.CLIENT_URL.split(',').map(o => o.trim())
   : ['http://localhost:5173', 'http://127.0.0.1:5173'];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. server-to-server, curl)
+    // Allow requests with no origin (e.g. server-to-server, curl, mobile)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -65,13 +78,13 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Body parser with strict size limits
-app.use(express.json({ limit: '5mb' }));  // Reduced from 10mb
-app.use(express.urlencoded({ extended: false }));  // extended: false is safer
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: false }));
 
 // ═══════════════════════════════════════════
 //  SECURITY: Input sanitization middleware
@@ -84,8 +97,7 @@ const sanitizeInput = (obj) => {
   if (typeof obj === 'object') {
     const sanitized = {};
     for (const key of Object.keys(obj)) {
-      // Block keys starting with $ (MongoDB operators)
-      if (key.startsWith('$')) continue;
+      if (key.startsWith('$')) continue; // Block MongoDB operators
       sanitized[key] = sanitizeInput(obj[key]);
     }
     return sanitized;
@@ -101,8 +113,10 @@ app.use((req, res, next) => {
 });
 
 // Logging
-if (process.env.NODE_ENV === 'development') {
+if (NODE_ENV === 'development') {
   app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
 }
 
 // ═══════════════════════════════════════════
@@ -113,8 +127,8 @@ if (process.env.NODE_ENV === 'development') {
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
-  standardHeaders: true,    // Return rate limit info in headers
-  legacyHeaders: false,     // Disable X-RateLimit headers
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { success: false, message: 'Too many requests, please try again later.' }
 });
 app.use('/api/', limiter);
@@ -122,7 +136,7 @@ app.use('/api/', limiter);
 // Stricter rate limit for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 15,                  // Reduced from 20
+  max: 15,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many authentication attempts.' }
@@ -163,6 +177,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'EtherBallot API is running',
+    version: '2.0.0',
+    environment: NODE_ENV,
     timestamp: new Date().toISOString()
   });
 });
@@ -177,29 +193,30 @@ app.use('*', (req, res) => {
 
 // Error handler — never leak stack traces or internal error messages to client
 app.use((err, req, res, next) => {
-  console.error('Server Error:', err);
+  console.error('Server Error:', err.message);
+  if (NODE_ENV === 'development') console.error(err.stack);
   res.status(err.status || 500).json({
     success: false,
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
+    message: NODE_ENV === 'development' ? err.message : 'Internal server error'
   });
 });
 
 // ═══════════════════════════════════════════
-//  SEED SUPER ADMIN
+//  SEED SUPER ADMIN (reads from .env)
 // ═══════════════════════════════════════════
 
 const seedSuperAdmin = async () => {
   try {
     const existingAdmin = await Admin.findOne({ role: 'super_admin' });
     if (!existingAdmin) {
-      await Admin.create({
-        username: 'superadmin',
-        password: 'Admin@123456',
-        name: 'Super Administrator',
-        email: 'admin@etherballot.com',
-        role: 'super_admin'
-      });
-      console.log('🔐 Super Admin seeded (change default password immediately!)');
+      const username = process.env.SUPER_ADMIN_USERNAME || 'superadmin';
+      const password = process.env.SUPER_ADMIN_PASSWORD || 'Admin@123456';
+      const name     = process.env.SUPER_ADMIN_NAME     || 'Super Administrator';
+      const email    = process.env.SUPER_ADMIN_EMAIL    || 'admin@etherballot.com';
+
+      await Admin.create({ username, password, name, email, role: 'super_admin' });
+      console.log('🔐 Super Admin seeded — change default password immediately!');
+      console.log(`   Username: ${username}`);
     }
   } catch (error) {
     console.error('Error seeding super admin:', error.message);
@@ -207,26 +224,52 @@ const seedSuperAdmin = async () => {
 };
 
 // ═══════════════════════════════════════════
+//  GRACEFUL SHUTDOWN
+// ═══════════════════════════════════════════
+
+const gracefulShutdown = (signal) => {
+  console.log(`\n⚠️  ${signal} received — shutting down gracefully...`);
+  server.close(() => {
+    console.log('✅ HTTP server closed.');
+    process.exit(0);
+  });
+  // Force shutdown after 10 seconds
+  setTimeout(() => {
+    console.error('❌ Forced shutdown after timeout.');
+    process.exit(1);
+  }, 10_000);
+};
+
+// ═══════════════════════════════════════════
 //  START SERVER
 // ═══════════════════════════════════════════
 
-const PORT = process.env.PORT || 5000;
+let server;
 
 const startServer = async () => {
   await connectDB();
   await seedSuperAdmin();
-  
-  app.listen(PORT, () => {
+
+  server = app.listen(PORT, () => {
+    const border = '═'.repeat(43);
     console.log(`
-    ╔═══════════════════════════════════════════╗
+    ╔${border}╗
     ║                                           ║
-    ║   🗳️  EtherBallot API Server              ║
-    ║   📡  Port: ${PORT}                        ║
-    ║   🌍  Env: ${process.env.NODE_ENV || 'development'}                ║
-    ║   📁  DB: MongoDB                         ║
+    ║   🗳️  EtherBallot API Server v2.0.0       ║
+    ║   📡  Port    : ${String(PORT).padEnd(24)}║
+    ║   🌍  Env     : ${String(NODE_ENV).padEnd(24)}║
+    ║   🔒  Security: Helmet + Rate Limit       ║
+    ║   ⚡  Perf    : Gzip Compression          ║
     ║                                           ║
-    ╚═══════════════════════════════════════════╝
+    ╚${border}╝
     `);
+  });
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT',  () => gracefulShutdown('SIGINT'));
+  process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err.message);
+    gracefulShutdown('uncaughtException');
   });
 };
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { adminAPI, electionAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   HiOutlineUserGroup, 
   HiOutlineClipboardList, 
@@ -10,7 +11,8 @@ import {
   HiOutlinePlus, 
   HiOutlineRefresh,
   HiOutlineTrash,
-  HiOutlineCheckCircle
+  HiOutlineCheckCircle,
+  HiOutlineExclamation
 } from 'react-icons/hi';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -28,6 +30,8 @@ const AdminDashboard = ({ tab: initialTab }) => {
   const [showCreateElection, setShowCreateElection] = useState(false);
   const [showCreateAdmin, setShowCreateAdmin] = useState(false);
   const [states, setStates] = useState([]);
+  const [deleteElectionId, setDeleteElectionId] = useState(null); // For confirm modal
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Election form
   const [electionForm, setElectionForm] = useState({
@@ -43,6 +47,13 @@ const AdminDashboard = ({ tab: initialTab }) => {
     username: '', password: '', name: '', email: '', state: '', district: '',
     type: 'state_admin'
   });
+
+  // Sync tab when prop changes (from route /admin/elections, /admin/voters etc.)
+  useEffect(() => {
+    if (initialTab && initialTab !== activeTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   useEffect(() => {
     loadData();
@@ -107,6 +118,21 @@ const AdminDashboard = ({ tab: initialTab }) => {
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to create election');
     }
+  };
+
+  // ═══ DELETE ELECTION ═══
+  const handleDeleteElection = async () => {
+    if (!deleteElectionId) return;
+    setDeleteLoading(true);
+    try {
+      await electionAPI.deleteElection(deleteElectionId);
+      toast.success('Election deleted successfully.');
+      setDeleteElectionId(null);
+      loadData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete election');
+    }
+    setDeleteLoading(false);
   };
 
   // ═══ CREATE ADMIN ═══
@@ -434,7 +460,7 @@ const AdminDashboard = ({ tab: initialTab }) => {
                           {new Date(el.startDate).toLocaleDateString()} - {new Date(el.endDate).toLocaleDateString()}
                         </td>
                         <td>
-                          <div className="flex gap-sm">
+                          <div className="flex gap-sm items-center">
                             {el.status === 'draft' && (
                               <button className="btn btn-sm btn-secondary" onClick={() => handleElectionStatus(el._id, 'upcoming')}>
                                 Publish
@@ -448,6 +474,16 @@ const AdminDashboard = ({ tab: initialTab }) => {
                             {el.status === 'active' && (
                               <button className="btn btn-sm btn-danger" onClick={() => handleElectionStatus(el._id, 'completed')}>
                                 Conclude
+                              </button>
+                            )}
+                            {(isSuperAdmin || isStateAdmin) && (
+                              <button
+                                className="btn btn-sm btn-ghost"
+                                onClick={() => setDeleteElectionId(el._id)}
+                                title="Delete Election"
+                                style={{ color: '#dc2626', padding: '4px 8px' }}
+                              >
+                                <HiOutlineTrash size={16} />
                               </button>
                             )}
                           </div>
@@ -726,6 +762,61 @@ const AdminDashboard = ({ tab: initialTab }) => {
           letter-spacing: 0.04em;
         }
       `}</style>
+
+      {/* ═══ DELETE ELECTION CONFIRM MODAL ═══ */}
+      <AnimatePresence>
+        {deleteElectionId && (
+          <motion.div
+            key="delete-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modal-overlay"
+            onClick={e => e.target === e.currentTarget && setDeleteElectionId(null)}
+            style={{ zIndex: 200 }}
+          >
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0, transition: { type: 'spring', stiffness: 340, damping: 28 } }}
+              exit={{ scale: 0.92, opacity: 0, y: 20, transition: { duration: 0.15 } }}
+              className="modal-content"
+              style={{ maxWidth: 420, textAlign: 'center' }}
+            >
+              <div style={{
+                width: 56, height: 56, borderRadius: '50%',
+                background: 'rgba(220, 38, 38, 0.1)', display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto var(--space-lg)'
+              }}>
+                <HiOutlineExclamation size={28} style={{ color: '#dc2626' }} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+                Delete Election?
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 'var(--space-xl)' }}>
+                This action is <strong>irreversible</strong>. All election data and results will be permanently removed.
+              </p>
+              <div className="flex gap-md" style={{ justifyContent: 'center' }}>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setDeleteElectionId(null)}
+                  disabled={deleteLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn"
+                  style={{ background: 'var(--accent-danger)', color: '#ffffff' }}
+                  onClick={handleDeleteElection}
+                  disabled={deleteLoading}
+                >
+                  {deleteLoading ? 'Deleting...' : 'Yes, Delete Election'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
