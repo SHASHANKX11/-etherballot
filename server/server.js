@@ -23,8 +23,12 @@ const PORT = 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // ═══════════════════════════════════════════
-//  SECURITY: Disable fingerprinting
+//  PROXY & SECURITY CONFIGURATION
 // ═══════════════════════════════════════════
+// Trust first proxy (nginx reverse proxy) so express-rate-limit and req.ip work properly
+app.set('trust proxy', 1);
+
+// Disable fingerprinting
 app.disable('x-powered-by');
 
 // ═══════════════════════════════════════════
