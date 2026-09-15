@@ -1,4 +1,6 @@
 require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -17,7 +19,7 @@ const votingRoutes = require('./routes/voting');
 const Admin = require('./models/Admin');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // ═══════════════════════════════════════════
@@ -40,20 +42,11 @@ app.use(compression({
 //  MIDDLEWARE
 // ═══════════════════════════════════════════
 
-// Security Headers (hardened)
+// Security Headers (configured to allow iframe preview and cross-origin resource access)
 app.use(helmet({
+  frameguard: false,
+  contentSecurityPolicy: false,
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "blob:"],
-      connectSrc: ["'self'", "https://cdn.jsdelivr.net"],
-      frameSrc: ["'self'", "https://maps.google.com"],
-    }
-  },
   hsts: {
     maxAge: 31536000,     // 1 year
     includeSubDomains: true,
@@ -63,19 +56,11 @@ app.use(helmet({
   noSniff: true,
 }));
 
-// CORS (strict origin list)
-const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(',').map(o => o.trim())
-  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
-
+// CORS configuration (supports local dev, iframe previews, and custom domain)
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. server-to-server, curl, mobile)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    // Allow requests with no origin (e.g. server-to-server, curl, mobile) or any origin in preview
+    callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -183,7 +168,33 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 404 handler — don't echo the requested URL back (prevents reflected XSS)
+// ═══════════════════════════════════════════
+//  CLIENT STATIC ASSET SERVING & SPA ROUTING
+// ═══════════════════════════════════════════
+
+const clientDistPath = path.join(__dirname, '../client/dist');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+
+  // SPA fallback: any non-API route serves index.html
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    const indexPath = path.join(clientDistPath, 'index.html');
+    res.sendFile(indexPath);
+  });
+}
+
+// 404 handler for unmatched API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'API route not found'
+  });
+});
+
+// Fallback 404 handler if static client is not built
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,

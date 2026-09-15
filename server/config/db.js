@@ -9,6 +9,29 @@ let connectionUri = null;
 let listenersAttached = false;
 
 /**
+ * Validate whether a string is a valid MongoDB connection URI scheme.
+ */
+const isValidMongoUri = (uri) => {
+  if (!uri || typeof uri !== 'string') return false;
+  const trimmed = uri.trim();
+  return trimmed.startsWith('mongodb://') || trimmed.startsWith('mongodb+srv://');
+};
+
+/**
+ * Attach event listeners to Mongoose connection.
+ */
+const attachListeners = () => {
+  if (listenersAttached) return;
+  listenersAttached = true;
+  mongoose.connection.on('disconnected', () => {
+    console.warn(`⚠️  MongoDB disconnected from ${connectionUri || 'the database'}.`);
+  });
+  mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB connection error:', err.message);
+  });
+};
+
+/**
  * Build and return the embedded MongoDB URI.
  * Reuses the existing instance if one is already running.
  */
@@ -24,14 +47,19 @@ const getEmbeddedUri = async () => {
     fs.mkdirSync(dbDir, { recursive: true });
   }
 
-  mongodInstance = await MongoMemoryServer.create({
-    instance: {
-      dbPath: dbDir,
-      storageEngine: 'wiredTiger'
-    }
-  });
-
-  return mongodInstance.getUri();
+  try {
+    mongodInstance = await MongoMemoryServer.create({
+      instance: {
+        dbPath: dbDir,
+        storageEngine: 'wiredTiger'
+      }
+    });
+    return mongodInstance.getUri();
+  } catch (err) {
+    console.warn(`⚠️  Persistent storage with wiredTiger failed (${err.message}). Starting in-memory MongoDB instance...`);
+    mongodInstance = await MongoMemoryServer.create();
+    return mongodInstance.getUri();
+  }
 };
 
 /**
@@ -48,37 +76,50 @@ const connectDB = async () => {
   }
 
   connectionPromise = (async () => {
-    const configuredUri = process.env.MONGODB_URI?.trim();
-    const uri = configuredUri || await getEmbeddedUri();
-    const isEmbedded = !configuredUri;
+    const rawUri = process.env.MONGODB_URI?.trim();
+    let configuredUri = null;
 
-    try {
-      const conn = await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: isEmbedded ? 5000 : 3000
-      });
-      connectionUri = uri;
-
-      if (isEmbedded) {
-        console.log(`✅ Embedded MongoDB Connected: ${conn.connection.host}`);
-        console.log('   💾 Data will be persistently stored at: server/data/db');
+    if (rawUri) {
+      if (isValidMongoUri(rawUri)) {
+        configuredUri = rawUri;
       } else {
-        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+        console.warn(`⚠️  Configured MONGODB_URI ("${rawUri}") is not a valid MongoDB URI (must start with "mongodb://" or "mongodb+srv://").`);
+        console.warn('   Automatically falling back to embedded MongoDB...');
       }
+    }
 
-      if (!listenersAttached) {
-        listenersAttached = true;
-        mongoose.connection.on('disconnected', () => {
-          console.warn(`⚠️  MongoDB disconnected from ${connectionUri || 'the configured database'}.`);
+    // Attempt remote/configured MongoDB if valid URI was provided
+    if (configuredUri) {
+      try {
+        const maskedUri = configuredUri.replace(/\/\/.*@/, '//***:***@');
+        console.log(`Connecting to configured MongoDB URI (${maskedUri})...`);
+        const conn = await mongoose.connect(configuredUri, {
+          serverSelectionTimeoutMS: 4000
         });
-        mongoose.connection.on('error', (err) => {
-          console.error('❌ MongoDB connection error:', err.message);
-        });
+        connectionUri = configuredUri;
+        console.log(`✅ MongoDB Connected to remote database: ${conn.connection.host}`);
+        attachListeners();
+        return conn.connection;
+      } catch (error) {
+        console.warn(`⚠️  Failed to connect to configured MongoDB URI: ${error.message}`);
+        console.warn('   Automatically falling back to embedded MongoDB...');
       }
+    }
 
+    // Connect to embedded MongoDB fallback
+    try {
+      const embeddedUri = await getEmbeddedUri();
+      const conn = await mongoose.connect(embeddedUri, {
+        serverSelectionTimeoutMS: 8000
+      });
+      connectionUri = embeddedUri;
+      console.log(`✅ Embedded MongoDB Connected: ${conn.connection.host}`);
+      console.log('   💾 Data stored at: server/data/db');
+      attachListeners();
       return conn.connection;
     } catch (error) {
-      const source = isEmbedded ? 'embedded MongoDB' : 'configured MongoDB URI';
-      throw new Error(`Unable to connect to ${source}: ${error.message}`, { cause: error });
+      console.error('❌ Unable to connect to embedded MongoDB:', error.message);
+      throw new Error(`Unable to connect to MongoDB: ${error.message}`, { cause: error });
     } finally {
       connectionPromise = null;
     }
