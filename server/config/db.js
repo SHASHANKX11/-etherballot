@@ -4,6 +4,9 @@ const path = require('path');
 
 // ─── Persisted reference so we never create a second MongoMemoryServer ───────
 let mongodInstance = null;
+let connectionPromise = null;
+let connectionUri = null;
+let listenersAttached = false;
 
 /**
  * Build and return the embedded MongoDB URI.
@@ -32,51 +35,56 @@ const getEmbeddedUri = async () => {
 };
 
 /**
- * Connect (or reconnect) to MongoDB.
- * Tries the URI from .env first; falls back to an embedded instance.
+ * Connect to MongoDB using the configured URI or the embedded fallback.
+ * Reuses an existing or in-flight Mongoose connection.
  */
 const connectDB = async () => {
-  try {
-    // ── Try the configured URI ──────────────────────────────────────────────
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      serverSelectionTimeoutMS: 3000
-    });
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-  } catch (err) {
-    console.log('⚠️  Local MongoDB not found. Starting embedded database...');
-    try {
-      const uri = await getEmbeddedUri();
-      await mongoose.connect(uri);
-      console.log(`✅ Embedded MongoDB Connected: ${mongoose.connection.host}`);
-      console.log('   💾 Data will be persistently stored at: server/data/db');
-    } catch (memError) {
-      console.error(`❌ Embedded MongoDB Connection Error: ${memError.message}`);
-      process.exit(1);
-    }
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
   }
 
-  // ── Attach event listeners only once ────────────────────────────────────
-  mongoose.connection.removeAllListeners('disconnected');
-  mongoose.connection.removeAllListeners('error');
+  if (connectionPromise) {
+    return connectionPromise;
+  }
 
-  mongoose.connection.on('disconnected', async () => {
-    console.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+  connectionPromise = (async () => {
+    const configuredUri = process.env.MONGODB_URI?.trim();
+    const uri = configuredUri || await getEmbeddedUri();
+    const isEmbedded = !configuredUri;
+
     try {
-      let uri = process.env.MONGODB_URI;
-      // If we're using the embedded server, get its URI
-      if (mongodInstance) {
-        uri = mongodInstance.getUri();
-      }
-      await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-      console.log('✅ MongoDB reconnected.');
-    } catch (e) {
-      console.error('❌ Reconnection failed:', e.message);
-    }
-  });
+      const conn = await mongoose.connect(uri, {
+        serverSelectionTimeoutMS: isEmbedded ? 5000 : 3000
+      });
+      connectionUri = uri;
 
-  mongoose.connection.on('error', (err) => {
-    console.error('❌ MongoDB connection error:', err.message);
-  });
+      if (isEmbedded) {
+        console.log(`✅ Embedded MongoDB Connected: ${conn.connection.host}`);
+        console.log('   💾 Data will be persistently stored at: server/data/db');
+      } else {
+        console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+      }
+
+      if (!listenersAttached) {
+        listenersAttached = true;
+        mongoose.connection.on('disconnected', () => {
+          console.warn(`⚠️  MongoDB disconnected from ${connectionUri || 'the configured database'}.`);
+        });
+        mongoose.connection.on('error', (err) => {
+          console.error('❌ MongoDB connection error:', err.message);
+        });
+      }
+
+      return conn.connection;
+    } catch (error) {
+      const source = isEmbedded ? 'embedded MongoDB' : 'configured MongoDB URI';
+      throw new Error(`Unable to connect to ${source}: ${error.message}`, { cause: error });
+    } finally {
+      connectionPromise = null;
+    }
+  })();
+
+  return connectionPromise;
 };
 
 module.exports = connectDB;

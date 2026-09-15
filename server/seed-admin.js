@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+require('dotenv').config();
+
 const Admin = require('./models/Admin');
 const connectDB = require('./config/db');
 
@@ -17,10 +18,10 @@ const seedAdmin = async () => {
     let admin = await Admin.findOne({ role: 'super_admin' });
     
     const adminData = {
-      username: 'superadmin',
-      password: 'Admin@123456',
-      name: 'Super Administrator',
-      email: 'admin@etherballot.com',
+      username: process.env.SUPER_ADMIN_USERNAME || 'superadmin',
+      password: process.env.SUPER_ADMIN_PASSWORD || 'Admin@123456',
+      name: process.env.SUPER_ADMIN_NAME || 'Super Administrator',
+      email: process.env.SUPER_ADMIN_EMAIL || 'admin@etherballot.com',
       role: 'super_admin'
     };
 
