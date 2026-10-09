@@ -70,8 +70,14 @@ export const authAPI = {
   login: (aadhaarNumber) =>
     api.post('/auth/login', { aadhaarNumber }),
 
-  verifyFace: (userId, faceDescriptor) =>
-    api.post('/auth/login/verify-face', { userId, faceDescriptor }),
+  verifyFace: (userId, faceDescriptor, isDemoBypass = false) =>
+    api.post('/auth/login/verify-face', { userId, faceDescriptor, isDemoBypass }),
+
+  verifyEmail: (token) =>
+    api.post('/auth/verify-email', { token }),
+
+  resendVerification: (email) =>
+    api.post('/auth/resend-verification', { email }),
 
   getMe: () =>
     api.get('/auth/me')

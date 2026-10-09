@@ -145,9 +145,13 @@ const Register = () => {
   };
 
   const handleStep2Submit = () => {
-    const { name, mobile, dateOfBirth, gender, state, district } = formData;
-    if (!name || !mobile || !dateOfBirth || !gender || !state || !district) {
+    const { name, email, mobile, dateOfBirth, gender, state, district } = formData;
+    if (!name || !email || !mobile || !dateOfBirth || !gender || !state || !district) {
       toast.error('Please fill all mandatory fields marked with *');
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      toast.error('Please enter a valid email address');
       return;
     }
     if (!userLocation) {
@@ -176,9 +180,9 @@ const Register = () => {
         ...formData,
         faceDescriptor
       });
-      toast.success('Registration successful! Welcome to EtherBallot 🎉');
+      toast.success(res.data.message || 'Registration successful! Welcome to EtherBallot 🎉');
       loginVoter(res.data.token, res.data.user);
-      navigate('/vote');
+      navigate(`/check-email?email=${encodeURIComponent(formData.email)}`);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     }
@@ -244,6 +248,23 @@ const Register = () => {
             />
           </div>
 
+          {/* Quick Dummy Aadhaar Generator */}
+          <div className="badge badge--info mb-lg animate-fade-in" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', width: '100%', borderRadius: 'var(--radius-md)' }}>
+            <div>
+              <span style={{ fontWeight: 600 }}>🎲 Need a test Aadhaar?</span>
+            </div>
+            <button 
+              type="button"
+              onClick={() => {
+                const randomAadhaar = '9' + Math.floor(10000000000 + Math.random() * 90000000000).toString().slice(0, 11);
+                setFormData(prev => ({ ...prev, aadhaarNumber: randomAadhaar }));
+              }} 
+              style={{ background: 'none', border: 'none', color: '#38bdf8', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}
+            >
+              Generate Dummy Aadhaar
+            </button>
+          </div>
+
           <button
             className="btn btn-primary btn-lg btn-block"
             onClick={handleValidateAadhaar}
@@ -262,16 +283,38 @@ const Register = () => {
       {step === 2 && (
         <motion.div key="reg-step2" variants={stepVariants} initial="enter" animate="center" exit="exit"
           className="glass-card glass-card--no-hover">
-          <div className="flex items-center gap-sm mb-lg">
-            <div className="feature-card__icon stat-card__icon--info" style={{ width: 42, height: 42, marginBottom: 0 }}>
-              <HiOutlineUser size={22} />
+          <div className="flex items-center justify-between mb-lg" style={{ flexWrap: 'wrap', gap: '8px' }}>
+            <div className="flex items-center gap-sm">
+              <div className="feature-card__icon stat-card__icon--info" style={{ width: 42, height: 42, marginBottom: 0 }}>
+                <HiOutlineUser size={22} />
+              </div>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Step 2: Personal & Location Details
+                </h2>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Required for electoral constituency matching</p>
+              </div>
             </div>
-            <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                Step 2: Personal & Location Details
-              </h2>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Required for electoral constituency matching</p>
-            </div>
+            <button
+              type="button"
+              className="btn btn-ghost btn-xs"
+              onClick={() => {
+                const randSuffix = Math.floor(1000 + Math.random() * 9000);
+                setFormData(prev => ({
+                  ...prev,
+                  name: `Citizen Test ${randSuffix}`,
+                  email: `test.${randSuffix}@etherballot.gov.in`,
+                  dateOfBirth: '1996-06-20',
+                  gender: 'female',
+                  state: 'Maharashtra',
+                  district: 'Mumbai City',
+                  mobile: '98' + Math.floor(10000000 + Math.random() * 90000000).toString()
+                }));
+              }}
+              style={{ color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.3)' }}
+            >
+              ⚡ Fill Dummy Details
+            </button>
           </div>
 
           <div className="grid grid-2">
@@ -280,8 +323,8 @@ const Register = () => {
               <input type="text" name="name" className="form-input" placeholder="Your full name" value={formData.name} onChange={handleChange} />
             </div>
             <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input type="email" name="email" className="form-input" placeholder="name@example.com" value={formData.email} onChange={handleChange} />
+              <label className="form-label">Email Address *</label>
+              <input type="email" name="email" className="form-input" placeholder="name@example.com" value={formData.email} onChange={handleChange} required />
             </div>
             <div className="form-group">
               <label className="form-label">Date of Birth *</label>
@@ -406,6 +449,14 @@ const Register = () => {
           >
             Continue to Face Biometrics →
           </button>
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-block mt-sm"
+            onClick={() => setStep(1)}
+          >
+            ← Back to Aadhaar Entry
+          </button>
         </motion.div>
       )}
 
@@ -426,6 +477,14 @@ const Register = () => {
             onError={(msg) => toast.error(msg)}
             mode="register"
           />
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-block mt-md"
+            onClick={() => setStep(2)}
+          >
+            ← Back to Personal Details & OTP
+          </button>
         </motion.div>
       )}
 
@@ -449,6 +508,7 @@ const Register = () => {
             {[
               ['Aadhaar Identifier', `****-****-${formData.aadhaarNumber.slice(-4)}`],
               ['Full Name', formData.name],
+              ['Email Address', formData.email],
               ['Mobile Number', formData.mobile],
               ['Date of Birth', formData.dateOfBirth],
               ['Gender', formData.gender.toUpperCase()],
@@ -465,6 +525,15 @@ const Register = () => {
 
           <button className="btn btn-success btn-lg btn-block" onClick={handleSubmit} disabled={loading}>
             {loading ? 'Submitting to Blockchain...' : '🗳️ Confirm & Issue Voting ID'}
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-block mt-sm"
+            onClick={() => setStep(3)}
+            disabled={loading}
+          >
+            ← Re-take Face Biometrics
           </button>
         </motion.div>
       )}

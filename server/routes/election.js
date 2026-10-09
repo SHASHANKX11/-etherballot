@@ -226,4 +226,39 @@ router.get('/:id/results', async (req, res) => {
   }
 });
 
+// DELETE /api/elections/:id (Super Admin or State Admin)
+router.delete('/:id', protect, authorize('super_admin', 'state_admin'), async (req, res) => {
+  try {
+    const election = await Election.findById(req.params.id);
+    if (!election) {
+      return res.status(404).json({ success: false, message: 'Election not found' });
+    }
+
+    // State admin can only delete elections in their state
+    if (req.userRole === 'state_admin' && election.state !== req.user.state) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only delete elections in your state'
+      });
+    }
+
+    await Election.findByIdAndDelete(req.params.id);
+
+    await AuditLog.create({
+      action: 'ELECTION_ENDED',
+      performedBy: { userId: req.user._id, userType: req.userRole },
+      targetResource: { type: 'Election', id: req.params.id },
+      details: `Election "${election.name}" was deleted by ${req.user.name}`,
+      success: true
+    });
+
+    res.json({
+      success: true,
+      message: 'Election deleted successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;

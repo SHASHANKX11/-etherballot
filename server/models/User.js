@@ -15,8 +15,14 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    required: [true, 'Email address is required'],
     trim: true,
-    lowercase: true
+    lowercase: true,
+    match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email address']
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false
   },
   mobile: {
     type: String,
@@ -90,6 +96,7 @@ const userSchema = new mongoose.Schema({
 // Index for fast lookups
 // Note: aadhaarNumber index is already created by unique: true on the field
 userSchema.index({ mobile: 1 });
+userSchema.index({ email: 1 });
 userSchema.index({ 'address.state': 1, 'address.district': 1 });
 
 // Check if account is locked

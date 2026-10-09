@@ -41,6 +41,9 @@ const Login = () => {
       setUserId(res.data.userId);
       setUserName(res.data.name);
       setMaskedMobile(res.data.mobile);
+      if (res.data.rawMobile) {
+        setMobile(res.data.rawMobile);
+      }
       toast.success('Aadhaar matched! Proceed with mobile OTP.');
       setStep(2);
     } catch (err) {
@@ -83,10 +86,10 @@ const Login = () => {
   };
 
   // ═══ STEP 3: Face Verification ═══
-  const handleFaceVerify = async (descriptor) => {
+  const handleFaceVerify = async (descriptor, meta = {}) => {
     setLoading(true);
     try {
-      const res = await authAPI.verifyFace(userId, descriptor);
+      const res = await authAPI.verifyFace(userId, descriptor, meta.isDemo === true);
       toast.success('Face biometric match verified! Welcome 🎉');
       loginVoter(res.data.token, res.data.user);
       navigate('/vote');
@@ -152,6 +155,21 @@ const Login = () => {
               autoFocus
               onKeyDown={e => e.key === 'Enter' && handleAadhaarSubmit()}
             />
+          </div>
+
+          {/* Quick Demo Aadhaar auto-fill */}
+          <div className="badge badge--info mb-lg animate-fade-in" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', width: '100%', borderRadius: 'var(--radius-md)' }}>
+            <div>
+              <span style={{ fontWeight: 600 }}>⚡ Demo Aadhaar:</span>{' '}
+              <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: 4, letterSpacing: '1px' }}>111122223333</code>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setAadhaarNumber('111122223333')} 
+              style={{ background: 'none', border: 'none', color: '#38bdf8', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}
+            >
+              Auto-fill
+            </button>
           </div>
 
           <button
@@ -240,6 +258,14 @@ const Login = () => {
           >
             {loading ? 'Verifying OTP...' : 'Verify & Proceed to Face Scan →'}
           </button>
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-block mt-sm"
+            onClick={() => setStep(1)}
+          >
+            ← Back to Aadhaar Entry
+          </button>
         </motion.div>
       )}
 
@@ -261,6 +287,14 @@ const Login = () => {
             onError={msg => toast.error(msg)}
             mode="verify"
           />
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-block mt-md"
+            onClick={() => setStep(2)}
+          >
+            ← Back to Mobile OTP
+          </button>
         </motion.div>
       )}
       </AnimatePresence>

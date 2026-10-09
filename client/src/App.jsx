@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import CyberBackground from './components/CyberBackground';
@@ -14,6 +14,15 @@ const AdminLogin     = lazy(() => import('./pages/AdminLogin'));
 const Voting         = lazy(() => import('./pages/Voting'));
 const Results        = lazy(() => import('./pages/Results'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const CheckEmail     = lazy(() => import('./pages/CheckEmail'));
+const VerifyEmail    = lazy(() => import('./pages/VerifyEmail'));
+
+const RouteLoader = () => (
+  <div className="page-container text-center" style={{ paddingTop: '20vh' }}>
+    <div className="spinner" style={{ margin: '0 auto' }} />
+    <p className="loading-text mt-md">Loading...</p>
+  </div>
+);
 
 function App() {
   return (
@@ -21,37 +30,41 @@ function App() {
       <CyberBackground />
       <Navbar />
       <main style={{ paddingTop: '114px', flex: 1, position: 'relative', zIndex: 1 }}>
-        <Routes>
-          <Route path="/"            element={<Home />} />
-          <Route path="/register"    element={<Register />} />
-          <Route path="/login"       element={<Login />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/results"     element={<Results />} />
+        <Suspense fallback={<RouteLoader />}>
+          <Routes>
+            <Route path="/"            element={<Home />} />
+            <Route path="/register"    element={<Register />} />
+            <Route path="/login"       element={<Login />} />
+            <Route path="/check-email" element={<CheckEmail />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/results"     element={<Results />} />
 
-          {/* Protected Voter Routes */}
-          <Route path="/vote" element={
-            <ProtectedRoute roles={['voter']}>
-              <Voting />
-            </ProtectedRoute>
-          } />
+            {/* Protected Voter Routes */}
+            <Route path="/vote" element={
+              <ProtectedRoute roles={['voter']}>
+                <Voting />
+              </ProtectedRoute>
+            } />
 
-          {/* Protected Admin Routes */}
-          <Route path="/admin" element={
-            <ProtectedRoute roles={['super_admin', 'state_admin', 'district_admin']}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/elections" element={
-            <ProtectedRoute roles={['super_admin', 'state_admin', 'district_admin']}>
-              <AdminDashboard tab="elections" />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/voters" element={
-            <ProtectedRoute roles={['super_admin', 'state_admin', 'district_admin']}>
-              <AdminDashboard tab="voters" />
-            </ProtectedRoute>
-          } />
-        </Routes>
+            {/* Protected Admin Routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute roles={['super_admin', 'state_admin', 'district_admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/elections" element={
+              <ProtectedRoute roles={['super_admin', 'state_admin', 'district_admin']}>
+                <AdminDashboard tab="elections" />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/voters" element={
+              <ProtectedRoute roles={['super_admin', 'state_admin', 'district_admin']}>
+                <AdminDashboard tab="voters" />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </Suspense>
       </main>
 
       {/* ═══ OFFICIAL GIGW GOVERNMENT FOOTER ═══ */}

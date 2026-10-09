@@ -12,9 +12,11 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const electionRoutes = require('./routes/election');
 const votingRoutes = require('./routes/voting');
+const voterRoutes = require('./routes/voter');
 
-// Import Admin model for seeding
+// Import models for seeding
 const Admin = require('./models/Admin');
+const User = require('./models/User');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -63,19 +65,23 @@ app.use(helmet({
   noSniff: true,
 }));
 
-// CORS (strict origin list)
+// CORS configuration
 const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(',').map(o => o.trim())
-  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+  : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:5174', 'http://localhost:3000'];
 
 app.use(cors({
   origin: (origin, callback) => {
+    // In development mode, allow any origin (e.g. localhost ports, mobile devices, local IP)
+    if (NODE_ENV === 'development') {
+      return callback(null, true);
+    }
     // Allow requests with no origin (e.g. server-to-server, curl, mobile)
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+    // In production, reject disallowed origins without throwing an unhandled exception
+    return callback(null, false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -171,6 +177,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/elections', electionRoutes);
 app.use('/api/voting', votingRoutes);
+app.use('/api/voters', voterRoutes);
 
 // Health check (no sensitive info exposed)
 app.get('/api/health', (req, res) => {
@@ -223,6 +230,38 @@ const seedSuperAdmin = async () => {
   }
 };
 
+const DEMO_FACE_DESCRIPTOR = Array.from({ length: 128 }, (_, i) =>
+  Number((Math.sin(i * 0.1) * 0.05).toFixed(4))
+);
+
+const seedDemoVoter = async () => {
+  try {
+    const dummyAadhaar = '111122223333';
+    const existing = await User.findOne({ aadhaarNumber: dummyAadhaar });
+    if (!existing) {
+      await User.create({
+        aadhaarNumber: dummyAadhaar,
+        name: 'Demo Citizen (Test Voter)',
+        email: 'demo.voter@etherballot.gov.in',
+        emailVerified: true,
+        mobile: '9876543210',
+        dateOfBirth: new Date('1995-01-01'),
+        gender: 'male',
+        address: {
+          state: 'Maharashtra',
+          district: 'Mumbai City',
+          pincode: '400001',
+          addressLine: '123 Election Promenade'
+        },
+        faceDescriptor: DEMO_FACE_DESCRIPTOR
+      });
+      console.log('👤 Dummy Voter seeded: Aadhaar 111122223333 | Mobile: 9876543210');
+    }
+  } catch (error) {
+    console.error('Error seeding demo voter:', error.message);
+  }
+};
+
 // ═══════════════════════════════════════════
 //  GRACEFUL SHUTDOWN
 // ═══════════════════════════════════════════
@@ -249,6 +288,7 @@ let server;
 const startServer = async () => {
   await connectDB();
   await seedSuperAdmin();
+  await seedDemoVoter();
 
   server = app.listen(PORT, () => {
     const border = '═'.repeat(43);
@@ -263,6 +303,23 @@ const startServer = async () => {
     ║                                           ║
     ╚${border}╝
     `);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n❌ Port ${PORT} is momentarily busy.`);
+    } else {
+      console.error('❌ Server startup error:', err.message);
+    }
+    process.exit(1);
+  });
+
+  process.once('SIGUSR2', () => {
+    if (server) {
+      server.close(() => process.kill(process.pid, 'SIGUSR2'));
+    } else {
+      process.kill(process.pid, 'SIGUSR2');
+    }
   });
 
   process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));

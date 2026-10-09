@@ -45,8 +45,21 @@ router.post('/cast', protect, authorize('voter'), async (req, res) => {
       });
     }
 
-    // Check if user already voted in this election
+    // Check user verification
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User record not found' });
+    }
+
+    if (!user.emailVerified) {
+      return res.status(403).json({
+        success: false,
+        code: 'EMAIL_NOT_VERIFIED',
+        message: 'Email verification required. You must verify your registered email address before casting your ballot.'
+      });
+    }
+
+    // Check if user already voted in this election
     if (user.hasVoted && user.hasVoted.get(electionId)) {
       return res.status(400).json({
         success: false,

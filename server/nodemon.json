@@ -1,0 +1,5 @@
+{
+  "watch": ["routes", "models", "services", "config", "server.js"],
+  "ignore": ["test*", "*.log", "*.tmp"],
+  "delay": 1000
+}

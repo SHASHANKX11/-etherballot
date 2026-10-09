@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { votingAPI } from '../services/api';
+import { votingAPI, authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   HiOutlineCheckCircle, 
@@ -8,7 +9,9 @@ import {
   HiOutlineClipboardCopy, 
   HiOutlineCube,
   HiOutlineArrowLeft,
-  HiOutlineExclamation
+  HiOutlineExclamation,
+  HiOutlineMail,
+  HiOutlineRefresh
 } from 'react-icons/hi';
 
 const Voting = () => {
@@ -21,6 +24,34 @@ const Voting = () => {
   const [voteReceipt, setVoteReceipt] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [resendingEmail, setResendingEmail] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    let timer;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => setResendCooldown(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    if (!user?.email) {
+      toast.error('No email associated with this account');
+      return;
+    }
+    if (resendCooldown > 0) return;
+
+    setResendingEmail(true);
+    try {
+      const res = await authAPI.resendVerification(user.email);
+      toast.success(res.data.message || 'Verification link sent to your email!');
+      setResendCooldown(60);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to resend verification link');
+    }
+    setResendingEmail(false);
+  };
 
   useEffect(() => {
     loadElections();
@@ -141,6 +172,49 @@ const Voting = () => {
         </p>
       </div>
 
+      {/* Unverified Email Warning Banner */}
+      {user && user.emailVerified === false && (
+        <div 
+          className="glass-card mb-xl animate-scale-in"
+          style={{ 
+            background: 'rgba(254, 242, 242, 0.95)', 
+            border: '1.5px solid #f87171',
+            padding: 'var(--space-md) var(--space-lg)' 
+          }}
+        >
+          <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: 12 }}>
+            <div className="flex items-center gap-md">
+              <div style={{ color: '#dc2626', fontSize: '1.5rem', display: 'flex' }}>
+                <HiOutlineMail />
+              </div>
+              <div>
+                <strong style={{ color: '#991b1b', fontSize: '0.98rem' }}>
+                  Email Verification Required for Ballot Casting
+                </strong>
+                <p style={{ color: '#7f1d1d', fontSize: '0.86rem', margin: '2px 0 0' }}>
+                  Please verify your registered email (<strong>{user.email}</strong>) to unlock electronic vote casting.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-sm">
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={handleResendVerification}
+                disabled={resendingEmail || resendCooldown > 0}
+                style={{ background: '#ffffff', color: '#dc2626', borderColor: '#fca5a5' }}
+              >
+                <HiOutlineRefresh className={resendingEmail ? 'spin' : ''} />
+                {resendCooldown > 0 ? `Resend (${resendCooldown}s)` : resendingEmail ? 'Sending...' : 'Resend Email'}
+              </button>
+              <Link to={`/check-email?email=${encodeURIComponent(user.email || '')}`} className="btn btn-primary btn-sm">
+                Instructions →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* No elections available */}
       {elections.length === 0 && (
         <div className="glass-card glass-card--no-hover text-center" style={{ padding: 'var(--space-3xl)', maxWidth: 600, margin: '0 auto' }}>
@@ -245,13 +319,29 @@ const Voting = () => {
 
           {selectedCandidate !== null && (
             <div className="text-center mt-2xl animate-scale-in">
-              <button
-                className="btn btn-success btn-lg"
-                onClick={() => setShowConfirm(true)}
-                style={{ padding: '16px 40px', fontSize: '1.1rem', fontWeight: 800 }}
-              >
-                🗳️ Review & Submit Vote for {selectedElection.candidates[selectedCandidate]?.name}
-              </button>
+              {user && user.emailVerified === false ? (
+                <div style={{ maxWidth: 500, margin: '0 auto' }}>
+                  <button
+                    className="btn btn-secondary btn-lg"
+                    onClick={() => toast.error('Please verify your email address to cast your ballot.')}
+                    disabled
+                    style={{ padding: '16px 40px', fontSize: '1.05rem', opacity: 0.7, cursor: 'not-allowed' }}
+                  >
+                    🔒 Verify Email to Unlock Ballot Casting
+                  </button>
+                  <p style={{ fontSize: '0.82rem', color: '#dc2626', marginTop: 8, fontWeight: 600 }}>
+                    Official policy mandates verified citizen email before smart contract vote authorization.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  className="btn btn-success btn-lg"
+                  onClick={() => setShowConfirm(true)}
+                  style={{ padding: '16px 40px', fontSize: '1.1rem', fontWeight: 800 }}
+                >
+                  🗳️ Review & Submit Vote for {selectedElection.candidates[selectedCandidate]?.name}
+                </button>
+              )}
             </div>
           )}
         </div>

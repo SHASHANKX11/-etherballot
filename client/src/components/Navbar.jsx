@@ -173,9 +173,10 @@ const Navbar = () => {
                 <div className="navbar__user-info hide-mobile">
                   <span className="navbar__user-name">{user?.name}</span>
                   <span className="navbar__user-role">
-                    {role === 'voter' ? '🗳️ Verified Elector' : 
-                     role === 'super_admin' ? '👑 Chief Election Officer' :
-                     role === 'state_admin' ? '🏛️ State Election Officer' : '📍 District Magistrate / DEO'}
+                    {role === 'voter' 
+                      ? (user?.emailVerified ? '🗳️ Verified Elector' : '⚠️ Email Pending') 
+                      : role === 'super_admin' ? '👑 Chief Election Officer' :
+                      role === 'state_admin' ? '🏛️ State Election Officer' : '📍 District Magistrate / DEO'}
                   </span>
                 </div>
                 <button onClick={handleLogout} className="btn btn-ghost btn-sm" title="Logout">

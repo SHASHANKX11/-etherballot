@@ -2,6 +2,10 @@ import { useRef, useState, useEffect } from 'react';
 import * as faceapi from 'face-api.js';
 import { HiOutlineCamera, HiOutlineCheckCircle, HiOutlineSparkles, HiOutlineLightBulb } from 'react-icons/hi';
 
+export const DEMO_FACE_DESCRIPTOR = Array.from({ length: 128 }, (_, i) =>
+  Number((Math.sin(i * 0.1) * 0.05).toFixed(4))
+);
+
 const FaceCapture = ({ onCapture, onError, mode = 'register' }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -10,6 +14,7 @@ const FaceCapture = ({ onCapture, onError, mode = 'register' }) => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMsg, setLoadingMsg] = useState('Initializing AI face detection models...');
+  const [cameraError, setCameraError] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
   const [livenessChecked, setLivenessChecked] = useState(false);
   const [captureReady, setCaptureReady] = useState(false);
@@ -20,6 +25,7 @@ const FaceCapture = ({ onCapture, onError, mode = 'register' }) => {
 
   // Load face-api models
   useEffect(() => {
+    let isMounted = true;
     const loadModels = async () => {
       try {
         setLoadingMsg('Loading biometric neural networks (WebGL)...');
@@ -32,19 +38,26 @@ const FaceCapture = ({ onCapture, onError, mode = 'register' }) => {
           faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
         ]);
         
+        if (!isMounted) return;
         setLoadingMsg('Requesting camera sensor access...');
         await startCamera();
+        if (!isMounted) return;
         setIsLoading(false);
         setStatusMsg('Align your face within the holographic frame');
       } catch (err) {
         console.error('Model loading error:', err);
-        setLoadingMsg('Failed to initialize AI face models. Please refresh.');
+        if (!isMounted) return;
+        setCameraError(true);
+        setIsLoading(false);
+        setLoadingMsg('AI face model network initialization failed.');
+        setStatusMsg('AI model loading issue. You can continue with Demo Biometrics.');
         onError?.('Failed to load face detection models');
       }
     };
     loadModels();
 
     return () => {
+      isMounted = false;
       stopCamera();
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
@@ -65,7 +78,8 @@ const FaceCapture = ({ onCapture, onError, mode = 'register' }) => {
       }
     } catch (err) {
       console.error('Camera error:', err);
-      setStatusMsg('Camera access denied. Please grant webcam permissions.');
+      setCameraError(true);
+      setStatusMsg('Webcam access unavailable. You can use the Demo Biometrics fallback.');
       onError?.('Camera access denied');
     }
   };
@@ -206,6 +220,13 @@ const FaceCapture = ({ onCapture, onError, mode = 'register' }) => {
     setStatusMsg('Liveness bypassed (Demo mode). Ready to capture.');
   };
 
+  const handleUseDemoBiometrics = () => {
+    stopCamera();
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setStatusMsg('✅ Demo biometric vector loaded successfully!');
+    onCapture?.(DEMO_FACE_DESCRIPTOR, { isDemo: true });
+  };
+
   return (
     <div className="face-capture">
       <div className="scanner-frame">
@@ -263,26 +284,60 @@ const FaceCapture = ({ onCapture, onError, mode = 'register' }) => {
         </div>
       </div>
 
+      {/* Camera / Hardware Error Banner */}
+      {cameraError && (
+        <div className="badge badge--warning animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '14px', width: '100%', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 700 }}>
+            <span>⚠️ Webcam Sensor Notice</span>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.84rem', color: 'var(--text-secondary)', textAlign: 'center' }}>
+            Webcam access is restricted, blocked, or unavailable. You can proceed seamlessly with our cryptographic Demo Biometric Vector.
+          </p>
+          <button
+            type="button"
+            className="btn btn-warning btn-sm"
+            onClick={handleUseDemoBiometrics}
+            style={{ alignSelf: 'center', marginTop: '4px' }}
+          >
+            ⚡ Continue with Demo Biometric Vector
+          </button>
+        </div>
+      )}
+
       {/* Action Controls */}
       <div className="scanner-controls">
         <button
+          type="button"
           className="btn btn-primary btn-lg btn-block"
           onClick={handleCapture}
-          disabled={(!captureReady && !livenessChecked) || isProcessingCapture}
+          disabled={(!captureReady && !livenessChecked) || isProcessingCapture || cameraError}
         >
           <HiOutlineCamera size={20} />
           {isProcessingCapture ? 'Processing Biometrics...' : (mode === 'register' ? 'Capture Face Descriptor' : 'Verify Identity')}
         </button>
 
-        {!livenessChecked && (
+        <div className="flex gap-sm w-full" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
+          {!livenessChecked && !cameraError && (
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm"
+              onClick={handleSkipLiveness}
+              title="Fast-forward liveness for demonstration"
+            >
+              ⚡ Fast-Forward Liveness
+            </button>
+          )}
+
           <button
+            type="button"
             className="btn btn-ghost btn-sm"
-            onClick={handleSkipLiveness}
-            title="Fast-forward liveness for demonstration"
+            onClick={handleUseDemoBiometrics}
+            style={{ color: '#38bdf8' }}
+            title="Use simulated biometric vector (useful for testing or devices without camera)"
           >
-            ⚡ Fast-Forward Liveness
+            🧪 Use Demo Biometric Vector
           </button>
-        )}
+        </div>
       </div>
 
       <div className="scanner-tip">
