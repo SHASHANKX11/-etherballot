@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import FaceCapture from '../components/FaceCapture';
 import toast from 'react-hot-toast';
-import { HiOutlineLockClosed, HiOutlineDeviceMobile, HiOutlineCamera, HiOutlineShieldCheck, HiOutlineSparkles } from 'react-icons/hi';
+import { HiOutlineLockClosed, HiOutlineDeviceMobile, HiOutlineCamera, HiOutlineShieldCheck } from 'react-icons/hi';
 
 // ─── Framer Motion step card variants ────────────────────────────────────────
 const stepVariants = {
@@ -26,7 +26,6 @@ const Login = () => {
   const [maskedMobile, setMaskedMobile] = useState('');
   const [mobile, setMobile] = useState('');
   const [otp, setOtp] = useState('');
-  const [otpVerified, setOtpVerified] = useState(false);
   const [devOtp, setDevOtp] = useState('');
 
   // ═══ STEP 1: Aadhaar Check ═══
@@ -77,7 +76,6 @@ const Login = () => {
     try {
       await authAPI.verifyOTP(mobile, otp);
       toast.success('Mobile verified! Proceed to facial authentication.');
-      setOtpVerified(true);
       setStep(3);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Invalid OTP');

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
@@ -26,7 +26,6 @@ const VerifyEmail = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
 
   const verificationAttemptedRef = useRef(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     let timer;

@@ -7,7 +7,6 @@ import {
   HiOutlineCheckCircle, 
   HiOutlineShieldCheck, 
   HiOutlineClipboardCopy, 
-  HiOutlineCube,
   HiOutlineArrowLeft,
   HiOutlineExclamation,
   HiOutlineMail,
@@ -61,7 +60,7 @@ const Voting = () => {
     try {
       const res = await votingAPI.getEligibleElections();
       setElections(res.data.elections);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load eligible elections');
     }
     setLoading(false);

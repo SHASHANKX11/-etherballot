@@ -5,9 +5,7 @@ import { authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   HiOutlineMail, 
-  HiOutlineCheckCircle, 
   HiOutlineRefresh, 
-  HiOutlineShieldCheck,
   HiOutlineArrowRight,
   HiOutlineClock
 } from 'react-icons/hi';
@@ -66,7 +64,7 @@ const CheckEmail = () => {
           Check Your Email
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: 'var(--space-lg)', lineHeight: 1.6 }}>
-          We've sent an official verification link to:
+          We&apos;ve sent an official verification link to:
           <br />
           <strong style={{ color: '#2563eb', fontSize: '1.1rem' }}>{email || 'your registered email'}</strong>
         </p>
@@ -85,7 +83,7 @@ const CheckEmail = () => {
         {/* Resend Section */}
         <div style={{ borderTop: '1px solid var(--border-secondary)', paddingTop: 'var(--space-lg)' }}>
           <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: 'var(--space-md)' }}>
-            Didn't receive the email or need a fresh link?
+            Didn&apos;t receive the email or need a fresh link?
           </p>
 
           {!initialEmail && (

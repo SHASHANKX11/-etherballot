@@ -8,8 +8,7 @@ import {
   HiOutlineShieldCheck, 
   HiOutlineSearch, 
   HiOutlinePhone,
-  HiOutlineGlobeAlt,
-  HiOutlineIdentification
+  HiOutlineGlobeAlt
 } from 'react-icons/hi';
 import AnimatedEmblem from './AnimatedEmblem';
 import VoterSearchModal from './VoterSearchModal';

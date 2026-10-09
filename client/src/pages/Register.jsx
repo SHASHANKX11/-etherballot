@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 import { 
   HiOutlineLockClosed, 
   HiOutlineUser, 
-  HiOutlineCamera, 
   HiOutlineCheckCircle, 
   HiOutlineLocationMarker,
   HiOutlineDeviceMobile,
@@ -78,7 +77,7 @@ const Register = () => {
         toast.success("Location precisely detected via browser GPS!");
         setLoading(false);
       },
-      (error) => {
+      (_error) => {
         // Fallback for demonstration / permissions
         setUserLocation({
           lat: 19.0760,
