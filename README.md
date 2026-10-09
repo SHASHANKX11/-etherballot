@@ -16,6 +16,7 @@
 ## 📌 Table of Contents
 
 - [Overview](#-overview)
+  - [Localhost Services & Endpoints](#-localhost-services--endpoints)
 - [Key Features](#-key-features)
 - [System Architecture](#-system-architecture)
 - [Biometric & Verification Pipeline](#-biometric--verification-pipeline)
@@ -44,6 +45,17 @@ By fusing **EVM Smart Contracts**, **Client-Side AI Biometrics (`face-api.js`)**
 2. **Double-Action Authentication**: Logins require both secret credentials and live facial verification matched against stored biometric descriptors.
 3. **Decentralized Balloting**: Eligible voters sign transactions via Web3 wallets (MetaMask) directly interacting with Ethereum smart contracts.
 4. **Cryptographic Proofs & Audit Trail**: Every vote and administrative action generates an immutable audit record and updates on-chain state without disclosing voter identity.
+
+### 🌐 Localhost Services & Endpoints
+
+When running locally, EtherBallot services are hosted at:
+
+| Service | Localhost URL | Port | Description | Access / Credentials |
+|:---|:---|:---:|:---|:---|
+| **Voter Web Portal** | [`http://localhost:5173`](http://localhost:5173) | `5173` | React 18 / Vite Client for Voters & Ballots | Public Citizen Access |
+| **Admin Dashboard** | [`http://localhost:5173/admin/login`](http://localhost:5173/admin/login) | `5173` | Administrative Election Management & Monitoring | `superadmin` / `Admin@123456` |
+| **Backend REST API** | [`http://localhost:5000`](http://localhost:5000) | `5000` | Express API Server base endpoint | Bearer JWT / Protected Endpoints |
+| **API Health Check** | [`http://localhost:5000/api/health`](http://localhost:5000/api/health) | `5000` | Server status and database health check | Public Status Probe |
 
 ---
 
