@@ -1,7 +1,37 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // ─── Persisted reference so we never create duplicate MongoMemoryServer instances ─
 let mongodInstance = null;
+let connectionPromise = null;
+let connectionUri = null;
+let listenersAttached = false;
+
+/**
+ * Validate whether a string is a valid MongoDB connection URI scheme.
+ */
+const isValidMongoUri = (uri) => {
+  if (!uri || typeof uri !== "string") return false;
+  const trimmed = uri.trim();
+  return (
+    trimmed.startsWith("mongodb://") || trimmed.startsWith("mongodb+srv://")
+  );
+};
+
+/**
+ * Attach event listeners to Mongoose connection.
+ */
+const attachListeners = () => {
+  if (listenersAttached) return;
+  listenersAttached = true;
+  mongoose.connection.on("disconnected", () => {
+    console.warn(
+      `⚠️  MongoDB disconnected from ${connectionUri || "the database"}.`,
+    );
+  });
+  mongoose.connection.on("error", (err) => {
+    console.error("❌ MongoDB connection error:", err.message);
+  });
+};
 
 // ─── Build and return a resilient, isolated embedded MongoDB URI ─────────────
 const getEmbeddedUri = async () => {
@@ -13,85 +43,70 @@ const getEmbeddedUri = async () => {
     }
   }
 
-  const { MongoMemoryServer } = require('mongodb-memory-server');
+  const { MongoMemoryServer } = require("mongodb-memory-server");
 
-  // Launch isolated, ephemeral in-memory instance (prevents lock file and code 62 errors)
+  const dbDir = path.join(__dirname, "..", "data", "db");
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
   mongodInstance = await MongoMemoryServer.create({
     instance: {
-      dbName: 'etherballot',
-      storageEngine: 'ephemeralForTest'
-    }
+      dbPath: dbDir,
+      storageEngine: "wiredTiger",
+    },
   });
 
   return mongodInstance.getUri();
 };
 
-// ─── Connect to MongoDB (Primary URI → In-Memory Fallback) ────────────────────
+/**
+ * Connect (or reconnect) to MongoDB.
+ * Tries the URI from .env first; falls back to an embedded instance.
+ */
 const connectDB = async () => {
-  // If already connected, do nothing
-  if (mongoose.connection.readyState === 1) {
-    return mongoose.connection;
-  }
-
-  // Attempt 1: Try Primary MongoDB URI (e.g. local service / Atlas)
-  const primaryUri = process.env.MONGODB_URI;
-  if (primaryUri) {
-    try {
-      const conn = await mongoose.connect(primaryUri, {
-        serverSelectionTimeoutMS: 3000,
-      });
-      console.log(`✅ Primary MongoDB Connected: ${conn.connection.host}`);
-      setupListeners();
-      return conn;
-    } catch (err) {
-      console.log('ℹ️  Primary MongoDB not reachable. Initializing embedded database...');
-    }
-  }
-
-  // Attempt 2: Start isolated In-Memory MongoDB (100% crash-proof, no lock conflicts)
   try {
-    const uri = await getEmbeddedUri();
-    const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000,
+    // ── Try the configured URI ──────────────────────────────────────────────
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 3000,
     });
-    console.log(`✅ Embedded MongoDB Connected: ${mongoose.connection.host}`);
-    setupListeners();
-    return conn;
-  } catch (memErr) {
-    console.error(`❌ Embedded MongoDB Error: ${memErr.message}`);
-    // If memory server failed, try recreating once
-    if (mongodInstance) {
-      try { await mongodInstance.stop(); } catch {}
-      mongodInstance = null;
-    }
-    const { MongoMemoryServer } = require('mongodb-memory-server');
-    mongodInstance = await MongoMemoryServer.create();
-    const fallbackUri = mongodInstance.getUri();
-    const conn = await mongoose.connect(fallbackUri);
-    console.log(`✅ Embedded MongoDB (Recovery) Connected: ${mongoose.connection.host}`);
-    setupListeners();
-    return conn;
-  }
-};
-
-// ─── Deduplicated Connection Event Listeners ─────────────────────────────────
-const setupListeners = () => {
-  mongoose.connection.removeAllListeners('disconnected');
-  mongoose.connection.removeAllListeners('error');
-
-  mongoose.connection.on('disconnected', async () => {
-    console.warn('⚠️  MongoDB disconnected. Attempting auto-reconnect...');
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
+  } catch (err) {
+    console.log("⚠️  Local MongoDB not found. Starting embedded database...");
     try {
-      const uri = mongodInstance ? mongodInstance.getUri() : (process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/etherballot');
+      const uri = await getEmbeddedUri();
+      await mongoose.connect(uri);
+      console.log(`✅ Embedded MongoDB Connected: ${mongoose.connection.host}`);
+      console.log("   💾 Data will be persistently stored at: server/data/db");
+    } catch (memError) {
+      console.error(
+        `❌ Embedded MongoDB Connection Error: ${memError.message}`,
+      );
+      process.exit(1);
+    }
+  }
+
+  // ── Attach event listeners only once ────────────────────────────────────
+  mongoose.connection.removeAllListeners("disconnected");
+  mongoose.connection.removeAllListeners("error");
+
+  mongoose.connection.on("disconnected", async () => {
+    console.warn("⚠️  MongoDB disconnected. Attempting to reconnect...");
+    try {
+      let uri = process.env.MONGODB_URI;
+      // If we're using the embedded server, get its URI
+      if (mongodInstance) {
+        uri = mongodInstance.getUri();
+      }
       await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-      console.log('✅ MongoDB reconnected successfully.');
+      console.log("✅ MongoDB reconnected.");
     } catch (e) {
-      console.error('❌ Reconnection failed:', e.message);
+      console.error("❌ Reconnection failed:", e.message);
     }
   });
 
-  mongoose.connection.on('error', (err) => {
-    console.error('❌ MongoDB connection error:', err.message);
+  mongoose.connection.on("error", (err) => {
+    console.error("❌ MongoDB connection error:", err.message);
   });
 };
 
@@ -110,7 +125,7 @@ const stopDB = async () => {
   }
 };
 
-process.on('SIGINT', stopDB);
-process.on('SIGTERM', stopDB);
+process.on("SIGINT", stopDB);
+process.on("SIGTERM", stopDB);
 
 module.exports = connectDB;

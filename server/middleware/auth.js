@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Admin = require('../models/Admin');
 
+const JWT_SECRET = process.env.JWT_SECRET || 'etherballot_secure_jwt_secret_dev_key_2026';
+
 // Verify JWT token
 const protect = async (req, res, next) => {
   let token;
@@ -20,7 +22,7 @@ const protect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+    const decoded = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256'],  // Explicitly restrict to expected algorithm
     });
     
@@ -105,7 +107,7 @@ const stateAccess = (req, res, next) => {
 
 // Generate JWT Token
 const generateToken = (id, role) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET, {
+  return jwt.sign({ id, role }, JWT_SECRET, {
     algorithm: 'HS256',       // Explicitly set algorithm
     expiresIn: process.env.JWT_EXPIRE || '7d'
   });

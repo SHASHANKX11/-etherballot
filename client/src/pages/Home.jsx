@@ -166,7 +166,7 @@ const Home = () => {
 
             <h2 className="gov-hero__main-heading">
               Sovereign Digital Electoral Roll & <br />
-              <span className="gov-hero__highlight shimmer-text">Blockchain Voting Infrastructure</span>
+              <span className="gov-hero__highlight shimmer-text">Voting Infrastructure</span>
             </h2>
 
             <p className="gov-hero__description">
