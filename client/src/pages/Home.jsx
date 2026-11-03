@@ -321,7 +321,7 @@ const Home = () => {
                 <HiOutlineHeart /> SVEEP Initiative • मतदानाचा हक्क
               </div>
               <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0f172a', marginBottom: 'var(--space-xs)' }}>
-                "No Voter to be Left Behind" • कोई भी मतदाता न छूटे
+                &ldquo;No Voter to be Left Behind&rdquo; • कोई भी मतदाता न छूटे
               </h2>
               <p style={{ color: '#475569', fontSize: '0.95rem', lineHeight: 1.6, maxWidth: 720 }}>
                 Systematic Voters’ Education and Electoral Participation (SVEEP) is the flagship program of the Election Commission of India for voter education, spreading voter awareness, and promoting voter literacy across the nation.

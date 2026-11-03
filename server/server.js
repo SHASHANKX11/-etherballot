@@ -1,6 +1,8 @@
-require('dotenv').config();
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config();
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -21,8 +23,8 @@ const Admin = require('./models/Admin');
 const User = require('./models/User');
 
 const app = express();
-const PORT = 3000;
-const NODE_ENV = process.env.NODE_ENV || 'development';
+const PORT = process.env.PORT || 5000;
+const NODE_ENV = process.env.NODE_ENV;
 
 // ═══════════════════════════════════════════
 //  PROXY & SECURITY CONFIGURATION

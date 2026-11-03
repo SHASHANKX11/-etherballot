@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const path = require("path");
+const fs = require("fs");
 
 // ─── Persisted reference so we never create duplicate MongoMemoryServer instances ─
 let mongodInstance = null;
@@ -50,14 +52,19 @@ const getEmbeddedUri = async () => {
     fs.mkdirSync(dbDir, { recursive: true });
   }
 
-  mongodInstance = await MongoMemoryServer.create({
-    instance: {
-      dbPath: dbDir,
-      storageEngine: "wiredTiger",
-    },
-  });
-
-  return mongodInstance.getUri();
+  try {
+    mongodInstance = await MongoMemoryServer.create({
+      instance: {
+        dbPath: dbDir,
+        storageEngine: "wiredTiger",
+      },
+    });
+    return mongodInstance.getUri();
+  } catch (err) {
+    console.warn(`⚠️  Persistent storage at ${dbDir} unavailable (${err.message.split('\n')[0]}). Falling back to in-memory MongoDB...`);
+    mongodInstance = await MongoMemoryServer.create();
+    return mongodInstance.getUri();
+  }
 };
 
 /**
