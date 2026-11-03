@@ -18,6 +18,12 @@
 - [Overview](#-overview)
   - [Localhost Services & Endpoints](#-localhost-services--endpoints)
 - [Key Features](#-key-features)
+- [How Blockchain is Used in EtherBallot](#-how-blockchain-is-used-in-etherballot)
+  - [1. Why Blockchain? Traditional vs. Decentralized Voting](#1-why-blockchain-traditional-vs-decentralized-voting)
+  - [2. The Solidity Smart Contract Engine](#2-the-solidity-smart-contract-engine)
+  - [3. Dual Anti-Fraud Cryptographic Locks](#3-dual-anti-fraud-cryptographic-locks)
+  - [4. The On-Chain Voting Lifecycle](#4-the-on-chain-voting-lifecycle)
+  - [5. Hybrid Architecture: Off-Chain Identity + On-Chain Trust](#5-hybrid-architecture-off-chain-identity--on-chain-trust)
 - [System Architecture](#-system-architecture)
 - [Biometric & Verification Pipeline](#-biometric--verification-pipeline)
 - [Technology Stack](#-technology-stack)
@@ -79,6 +85,142 @@ When running locally, EtherBallot services are hosted at:
 - 📜 **Role-Based Access Control (RBAC)**:
   - Granular separation between **Super Admins**, **Election Commissioners**, and **Registered Voters**.
   - Strict JWT validation, rate limiting, and NoSQL injection sanitization.
+
+---
+
+## ⛓️ How Blockchain is Used in EtherBallot
+
+In EtherBallot, the blockchain serves as the **immutable, decentralized trust engine** of the entire election system. It eliminates reliance on central database administrators, governments, or third-party servers by permanently executing and recording votes on the **Ethereum Virtual Machine (EVM)**.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                   HOW BLOCKCHAIN SECURES ETHERBALLOT                           │
+├────────────────────────────────┬────────────────────────────────────────────────┤
+│ 🔒 Immutability                │ Once a vote is cast, it can NEVER be edited,   │
+│                                │ deleted, or overwritten by ANY administrator.   │
+├────────────────────────────────┼────────────────────────────────────────────────┤
+│ 🛡️ Double-Vote Prevention      │ On-chain mapping checks both wallet address     │
+│                                │ AND Keccak-256 Aadhaar hash atomically.        │
+├────────────────────────────────┼────────────────────────────────────────────────┤
+│ 📜 Cryptographic Audit Trail   │ Every ballot generates a unique 32-byte hash   │
+│                                │ receipt permanently sealed in the block ledger.│
+├────────────────────────────────┼────────────────────────────────────────────────┤
+│ ⚖️ Autonomous Tallying         │ Final tallies and winner calculations are done │
+│                                │ directly by smart contract code, not humans.   │
+└────────────────────────────────┴────────────────────────────────────────────────┘
+```
+
+---
+
+### 1. Why Blockchain? Traditional vs. Decentralized Voting
+
+| Aspect | Centralized Voting Systems (SQL / EVMs / Paper) | EtherBallot Decentralized Blockchain Voting |
+|:---|:---|:---|
+| **Data Storage** | Central database server (PostgreSQL, MySQL, MongoDB) | Distributed Ethereum / EVM blockchain nodes |
+| **Trust Model** | Must trust database admins, hosting providers & vendors | Zero-trust: mathematically verified by consensus |
+| **Tamper Risk** | Anyone with DB root access can modify votes silently | Cryptographically impossible to rewrite past blocks |
+| **Receipts** | Paper slip or static screen confirmation | Cryptographic Transaction Hash (`bytes32 voteHash`) |
+| **Auditability**| Closed-box recounts requiring weeks | Real-time, instant public audit via blockchain explorer |
+
+---
+
+### 2. The Solidity Smart Contract Engine (`contracts/VotingContract.sol`)
+
+The core of the decentralized voting protocol is written in Solidity `^0.8.19` and compiled for EVM execution. It manages the following state structures:
+
+* **`elections` mapping (`mapping(uint256 => Election)`)**: Stores each election's metadata, immutable start/end timestamps, candidate count, and total votes.
+* **`candidates` mapping (`mapping(uint256 => mapping(uint256 => Candidate))`)**: Stores registered candidates for each election and their on-chain vote counters.
+* **`voteRecords` array (`VoteRecord[]`)**: An append-only historical audit log containing cryptographic vote hashes, voter addresses, election IDs, and block timestamps.
+
+---
+
+### 3. Dual Anti-Fraud Cryptographic Locks
+
+To prevent malicious actors from voting more than once, the smart contract enforces **two independent on-chain barriers** inside the `castVote` function:
+
+```solidity
+// Barrier 1: Prevents the same Ethereum wallet from voting twice
+require(!hasVoted[_electionId][msg.sender], "You have already voted in this election");
+
+// Barrier 2: Prevents the same citizen from using multiple wallets (Sybil Attack Defense)
+require(!aadhaarVoted[_electionId][_aadhaarHash], "This Aadhaar has already been used to vote");
+```
+
+1. **Wallet Address Lock (`hasVoted`)**: Records `msg.sender` as having participated in `_electionId`.
+2. **Identity Pseudonymization Lock (`aadhaarVoted`)**: Even if a voter generates multiple MetaMask wallets, their identity is hashed (`keccak256(Aadhaar)`). Once that hash has voted in an election, any subsequent attempt with a different wallet is reverted by the contract.
+
+---
+
+### 4. The On-Chain Voting Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Voter as Authenticated Citizen
+    participant Client as React / Web3 Client
+    participant Contract as VotingContract.sol (EVM)
+    participant Ledger as Ethereum Blockchain
+
+    Note over Voter,Contract: Step 1: Pre-Vote Validation
+    Voter->>Client: Selects Candidate & Submits Ballot
+    Client->>Contract: castVote(electionId, candidateId, aadhaarHash)
+
+    Note over Contract: Step 2: Atomic Smart Contract Verification
+    Contract->>Contract: Verify electionExists(electionId)
+    Contract->>Contract: Verify block.timestamp BETWEEN startTime AND endTime
+    Contract->>Contract: Verify hasVoted[electionId][msg.sender] == false
+    Contract->>Contract: Verify aadhaarVoted[electionId][aadhaarHash] == false
+
+    Note over Contract,Ledger: Step 3: State Mutation & Ledger Sealing
+    Contract->>Contract: hasVoted[electionId][msg.sender] = true
+    Contract->>Contract: aadhaarVoted[electionId][aadhaarHash] = true
+    Contract->>Contract: candidates[candidateId].voteCount++
+    Contract->>Contract: elections[electionId].totalVotes++
+    Contract->>Ledger: Generate keccak256(msg.sender, electionId, candidateId, timestamp)
+    Contract-->>Client: Emit VoteCast(electionId, candidateId, msg.sender, voteHash)
+
+    Note over Client,Voter: Step 4: Cryptographic Ballot Receipt
+    Client->>Voter: Displays Immutable Vote Hash Receipt & Transaction ID
+```
+
+#### Cryptographic Receipt Generation
+When `castVote(...)` executes successfully, the smart contract mints a unique cryptographic proof:
+```solidity
+bytes32 voteHash = keccak256(
+    abi.encodePacked(msg.sender, _electionId, _candidateId, block.timestamp)
+);
+```
+The voter receives this `voteHash` as their **tamper-proof digital receipt**. Anyone can verify on a block explorer that this transaction was committed in a specific block at an exact timestamp without revealing private biometric data.
+
+---
+
+### 5. Hybrid Architecture: Off-Chain Identity + On-Chain Trust
+
+EtherBallot adopts an industry-standard **Hybrid Web3 Architecture** to ensure fast UX without compromising blockchain immutability:
+
+```
+┌──────────────────────────────────────────────┐
+│  OFF-CHAIN LAYER (Node.js + MongoDB + AI)    │
+│  • 128D Facial Biometric Vector Matching     │  ◄── Fast, Gas-Free, Private KYC
+│  • Email Verification Code Dispatch (Gmail)  │
+│  • PII (Name, Address, Demographic Data)     │
+└──────────────────────┬───────────────────────┘
+                       │  (Generates Verified Session Token)
+                       ▼
+┌──────────────────────────────────────────────┐
+│  ON-CHAIN LAYER (Solidity + Ethereum EVM)    │
+│  • Immutable Ballot Casting (castVote)       │  ◄── Decentralized, Censorship-Proof,
+│  • Double-Voting Lock (hasVoted / aadhaar)   │      Permanent Ledger
+│  • Autonomous On-Chain Tallying & Winner     │
+└──────────────────────────────────────────────┘
+```
+
+1. **Off-Chain (Privacy & Performance)**:
+   - Heavy machine learning computations (128-dimensional facial descriptors using `face-api.js`) and voter PII (names, emails, dates of birth) stay off-chain to maintain voter privacy and avoid exorbitant gas costs.
+   - Verification codes are dispatched from the official project mailer to verify email ownership.
+2. **On-Chain (Security & Trust)**:
+   - Once identity is proven, the ballot itself is signed and recorded directly on the blockchain.
+   - Vote counters, election timers, and audit logs are governed solely by smart contract logic, guaranteeing that **no admin, server host, or attacker can ever manipulate the election results**.
 
 ---
 
