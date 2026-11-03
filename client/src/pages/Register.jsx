@@ -11,7 +11,8 @@ import {
   HiOutlineCheckCircle, 
   HiOutlineLocationMarker,
   HiOutlineDeviceMobile,
-  HiOutlineShieldCheck
+  HiOutlineShieldCheck,
+  HiOutlineMail
 } from 'react-icons/hi';
 
 // ─── Framer Motion step card variants ───────────────────────────────────────
@@ -106,39 +107,39 @@ const Register = () => {
     setLoading(false);
   };
 
-  // ═══ STEP 2: Personal Details + OTP ═══
+  // ═══ STEP 2: Personal Details + Email Verification Code ═══
   const handleSendOTP = async () => {
-    if (!/^\d{10}$/.test(formData.mobile)) {
-      toast.error('Mobile number must be exactly 10 digits');
+    if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      toast.error('Please enter a valid email address first');
       return;
     }
     setLoading(true);
     try {
-      const res = await authAPI.sendOTP(formData.mobile);
-      toast.success('OTP sent to your mobile!');
+      const res = await authAPI.sendOTP({ email: formData.email });
+      toast.success(res.data.message || `Verification code sent to ${formData.email}!`);
       setOtpSent(true);
       if (res.data.otp) {
         setDevOtp(res.data.otp);
-        toast(`Dev OTP: ${res.data.otp}`, { icon: '🔑', duration: 10000 });
+        toast(`Dev Code: ${res.data.otp}`, { icon: '🔑', duration: 10000 });
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send OTP');
+      toast.error(err.response?.data?.message || 'Failed to send verification code');
     }
     setLoading(false);
   };
 
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) {
-      toast.error('OTP must be 6 digits');
+      toast.error('Verification code must be 6 digits');
       return;
     }
     setLoading(true);
     try {
-      await authAPI.verifyOTP(formData.mobile, otp);
-      toast.success('Mobile verified successfully!');
+      await authAPI.verifyOTP({ email: formData.email, otp });
+      toast.success('Email verified successfully!');
       setOtpVerified(true);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'OTP verification failed');
+      toast.error(err.response?.data?.message || 'Verification code failed');
     }
     setLoading(false);
   };
@@ -158,7 +159,7 @@ const Register = () => {
       return;
     }
     if (!otpVerified) {
-      toast.error('Please verify your mobile number with OTP first');
+      toast.error('Please verify your email address with the verification code first');
       return;
     }
     setStep(3);
@@ -188,7 +189,7 @@ const Register = () => {
     setLoading(false);
   };
 
-  const stepLabels = ['Aadhaar', 'Details & OTP', 'Face AI', 'Review'];
+  const stepLabels = ['Aadhaar', 'Details & Email Code', 'Face AI', 'Review'];
 
   return (
     <div className="page-container" style={{ maxWidth: 660, margin: '0 auto' }}>
@@ -322,10 +323,6 @@ const Register = () => {
               <input type="text" name="name" className="form-input" placeholder="Your full name" value={formData.name} onChange={handleChange} />
             </div>
             <div className="form-group">
-              <label className="form-label">Email Address *</label>
-              <input type="email" name="email" className="form-input" placeholder="name@example.com" value={formData.email} onChange={handleChange} required />
-            </div>
-            <div className="form-group">
               <label className="form-label">Date of Birth *</label>
               <input type="date" name="dateOfBirth" className="form-input" value={formData.dateOfBirth} onChange={handleChange} />
             </div>
@@ -337,6 +334,18 @@ const Register = () => {
                 <option value="female">Female</option>
                 <option value="other">Other</option>
               </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Mobile Phone Number *</label>
+              <input 
+                type="text" 
+                name="mobile" 
+                className="form-input" 
+                placeholder="10-digit mobile" 
+                value={formData.mobile} 
+                onChange={e => setFormData(prev => ({ ...prev, mobile: e.target.value.replace(/\D/g, '') }))} 
+                maxLength={10} 
+              />
             </div>
             <div className="form-group">
               <label className="form-label">State / UT *</label>
@@ -381,32 +390,40 @@ const Register = () => {
             )}
           </div>
 
-          {/* Mobile + OTP */}
+          {/* Email Verification Code Section */}
           <div className="form-group" style={{ borderTop: '1px solid var(--border-secondary)', paddingTop: 'var(--space-lg)', marginTop: 'var(--space-lg)' }}>
             <label className="form-label">
-              <HiOutlineDeviceMobile style={{ color: '#fbbf24' }} /> Mobile Number & OTP Verification *
+              <HiOutlineMail style={{ color: '#2563eb' }} /> Email Verification Code *
             </label>
             <div className="flex gap-sm">
               <input
-                type="text"
-                name="mobile"
+                type="email"
+                name="email"
                 className="form-input"
-                placeholder="10-digit mobile"
-                value={formData.mobile}
-                onChange={e => setFormData(prev => ({ ...prev, mobile: e.target.value.replace(/\D/g, '') }))}
-                maxLength={10}
+                placeholder="Enter email to receive code"
+                value={formData.email}
+                onChange={handleChange}
                 style={{ flex: 1 }}
               />
-              <button className="btn btn-secondary" onClick={handleSendOTP} disabled={loading || otpSent || formData.mobile.length !== 10}>
-                {otpSent ? 'OTP Sent ✓' : 'Send OTP'}
+              <button 
+                type="button" 
+                className="btn btn-secondary" 
+                onClick={handleSendOTP} 
+                disabled={loading || otpVerified || !formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)}
+              >
+                {otpSent ? 'Resend Code' : 'Send Email Code'}
               </button>
             </div>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4, display: 'block' }}>
+              Verification code is dispatched from <strong>ehterballotproject@gmail.com</strong>
+            </span>
           </div>
 
           {devOtp && !otpVerified && (
             <div className="badge badge--warning mb-md animate-fade-in" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', width: '100%' }}>
-              <span>🔑 Test OTP: <strong>{devOtp}</strong></span>
+              <span>🔑 Test Code: <strong>{devOtp}</strong></span>
               <button 
+                type="button"
                 onClick={() => setOtp(devOtp)} 
                 style={{ background: 'none', color: '#fbbf24', fontWeight: 700, textDecoration: 'underline' }}
               >
@@ -417,19 +434,20 @@ const Register = () => {
 
           {otpSent && !otpVerified && (
             <div className="form-group animate-fade-in">
-              <label className="form-label">Enter 6-Digit OTP</label>
+              <label className="form-label">Enter 6-Digit Email Verification Code</label>
               <div className="flex gap-sm">
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="6-digit code"
+                  placeholder="e.g. 123456"
                   value={otp}
                   onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
                   maxLength={6}
                   style={{ flex: 1 }}
+                  onKeyDown={e => e.key === 'Enter' && handleVerifyOTP()}
                 />
-                <button className="btn btn-success" onClick={handleVerifyOTP} disabled={loading || otp.length !== 6}>
-                  Verify OTP
+                <button type="button" className="btn btn-success" onClick={handleVerifyOTP} disabled={loading || otp.length !== 6}>
+                  Verify Code
                 </button>
               </div>
             </div>
@@ -437,7 +455,7 @@ const Register = () => {
 
           {otpVerified && (
             <div className="badge badge--success mb-lg animate-scale-in" style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
-              <HiOutlineCheckCircle /> Mobile Number Verified
+              <HiOutlineCheckCircle /> Email Address Verified Successfully
             </div>
           )}
 

@@ -58,11 +58,19 @@ export const authAPI = {
   validateAadhaar: (aadhaarNumber) =>
     api.post('/auth/validate-aadhaar', { aadhaarNumber }),
 
-  sendOTP: (mobile) =>
-    api.post('/auth/send-otp', { mobile }),
+  sendOTP: (target) => {
+    const payload = typeof target === 'string'
+      ? (target.includes('@') ? { email: target } : { mobile: target })
+      : target;
+    return api.post('/auth/send-otp', payload);
+  },
 
-  verifyOTP: (mobile, otp) =>
-    api.post('/auth/verify-otp', { mobile, otp }),
+  verifyOTP: (target, otp) => {
+    const payload = typeof target === 'string'
+      ? (target.includes('@') ? { email: target, otp } : { mobile: target, otp })
+      : { ...target, otp };
+    return api.post('/auth/verify-otp', payload);
+  },
 
   register: (userData) =>
     api.post('/auth/register', userData),

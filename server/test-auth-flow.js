@@ -60,23 +60,23 @@ const run = async () => {
   console.log(`   Status: ${valRes.status}, Success: ${valRes.data.success}`);
   if (!valRes.data.success) throw new Error("Aadhaar validation failed");
 
-  // Step 2: Send & Verify OTP
-  console.log("2. Testing OTP Dispatch...");
-  const otpRes = await request("/auth/send-otp", "POST", { mobile });
+  // Step 2: Send & Verify Email Verification Code
+  console.log("2. Testing Email Verification Code Dispatch...");
+  const otpRes = await request("/auth/send-otp", "POST", { email });
   console.log(
     `   Status: ${otpRes.status}, OTP received in dev: ${otpRes.data.otp}`,
   );
   const testOtp = otpRes.data.otp;
 
-  console.log("3. Testing OTP Verification...");
+  console.log("3. Testing Email Verification Code Verification...");
   const verifyRes = await request("/auth/verify-otp", "POST", {
-    mobile,
+    email,
     otp: testOtp,
   });
   console.log(
     `   Status: ${verifyRes.status}, Verified: ${verifyRes.data.verified}`,
   );
-  if (!verifyRes.data.verified) throw new Error("OTP verification failed");
+  if (!verifyRes.data.verified) throw new Error("Email verification code failed");
 
   // Step 4: Register Voter
   console.log("4. Testing Voter Registration (Form 6)...");
@@ -104,14 +104,14 @@ const run = async () => {
   if (!loginRes.data.success) throw new Error("Login Step 1 failed");
   const userId = loginRes.data.userId;
 
-  // Step 6: Test Login Step 2 (Mobile OTP)
-  console.log("6. Testing Login Mobile OTP...");
+  // Step 6: Test Login Step 2 (Email Verification Code)
+  console.log("6. Testing Login Email Verification Code...");
   const loginOtpRes = await request("/auth/send-otp", "POST", {
-    mobile: loginRes.data.rawMobile,
+    email: loginRes.data.rawEmail || email,
   });
   const loginOtp = loginOtpRes.data.otp;
   const loginVerifyRes = await request("/auth/verify-otp", "POST", {
-    mobile: loginRes.data.rawMobile,
+    email: loginRes.data.rawEmail || email,
     otp: loginOtp,
   });
   console.log(

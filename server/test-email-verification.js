@@ -18,7 +18,7 @@ const crypto = require('crypto');
 const connectDB = require('./config/db');
 const User = require('./models/User');
 const VerificationToken = require('./models/VerificationToken');
-const { sendVerificationEmail } = require('./services/emailService');
+const { sendVerificationEmail, sendOtpEmail } = require('./services/emailService');
 
 const runTests = async () => {
   console.log('🧪 Starting EtherBallot Email Verification Test Suite...\n');
@@ -34,9 +34,19 @@ const runTests = async () => {
       name: 'Aditya Sharma',
       token: testToken
     });
-    console.log(`✅ Email sent successfully! MessageId: ${emailResult.messageId}`);
+    console.log(`✅ Verification Link Email sent successfully! MessageId: ${emailResult.messageId}`);
     if (emailResult.previewUrl) {
       console.log(`✅ Live Email Preview URL available: ${emailResult.previewUrl}`);
+    }
+
+    const otpResult = await sendOtpEmail({
+      to: 'voter.test@example.com',
+      name: 'Aditya Sharma',
+      otp: '482915'
+    });
+    console.log(`✅ Verification Code (OTP) Email sent successfully! MessageId: ${otpResult.messageId}`);
+    if (otpResult.previewUrl) {
+      console.log(`✅ Live OTP Preview URL available: ${otpResult.previewUrl}`);
     }
 
     // ─── Test 2: User Creation with VerificationToken ────────────────────

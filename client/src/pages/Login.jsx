@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
 import FaceCapture from '../components/FaceCapture';
 import toast from 'react-hot-toast';
-import { HiOutlineLockClosed, HiOutlineDeviceMobile, HiOutlineCamera, HiOutlineShieldCheck } from 'react-icons/hi';
+import { HiOutlineLockClosed, HiOutlineDeviceMobile, HiOutlineCamera, HiOutlineShieldCheck, HiOutlineMail } from 'react-icons/hi';
 
 // ─── Framer Motion step card variants ────────────────────────────────────────
 const stepVariants = {
@@ -23,9 +23,12 @@ const Login = () => {
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [maskedEmail, setMaskedEmail] = useState('');
   const [maskedMobile, setMaskedMobile] = useState('');
   const [mobile, setMobile] = useState('');
   const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [devOtp, setDevOtp] = useState('');
 
   // ═══ STEP 1: Aadhaar Check ═══
@@ -40,10 +43,14 @@ const Login = () => {
       setUserId(res.data.userId);
       setUserName(res.data.name);
       setMaskedMobile(res.data.mobile);
+      if (res.data.rawEmail || res.data.email) {
+        setUserEmail(res.data.rawEmail || res.data.email);
+        setMaskedEmail(res.data.email || res.data.rawEmail);
+      }
       if (res.data.rawMobile) {
         setMobile(res.data.rawMobile);
       }
-      toast.success('Aadhaar matched! Proceed with mobile OTP.');
+      toast.success('Aadhaar matched! Proceed with email verification.');
       setStep(2);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed - Aadhaar not found');
@@ -51,34 +58,40 @@ const Login = () => {
     setLoading(false);
   };
 
-  // ═══ STEP 2: OTP ═══
+  // ═══ STEP 2: Email Verification Code ═══
   const handleSendOTP = async () => {
-    if (!/^\d{10}$/.test(mobile)) {
-      toast.error('Enter your registered 10-digit mobile number');
+    const targetEmail = userEmail;
+    if (!targetEmail || !/^\S+@\S+\.\S+$/.test(targetEmail)) {
+      toast.error('Valid registered email address is required');
       return;
     }
     setLoading(true);
     try {
-      const res = await authAPI.sendOTP(mobile);
-      toast.success('OTP sent to your mobile!');
+      const res = await authAPI.sendOTP({ email: targetEmail });
+      toast.success(res.data.message || `Verification code dispatched to ${targetEmail}!`);
+      setOtpSent(true);
       if (res.data.otp) {
         setDevOtp(res.data.otp);
-        toast(`Dev OTP: ${res.data.otp}`, { icon: '🔑', duration: 10000 });
+        toast(`Dev Code: ${res.data.otp}`, { icon: '🔑', duration: 10000 });
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send OTP');
+      toast.error(err.response?.data?.message || 'Failed to send verification code');
     }
     setLoading(false);
   };
 
   const handleVerifyOTP = async () => {
+    if (otp.length !== 6) {
+      toast.error('Verification code must be 6 digits');
+      return;
+    }
     setLoading(true);
     try {
-      await authAPI.verifyOTP(mobile, otp);
-      toast.success('Mobile verified! Proceed to facial authentication.');
+      await authAPI.verifyOTP({ email: userEmail, otp });
+      toast.success('Email verified! Proceed to facial authentication.');
       setStep(3);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Invalid OTP');
+      toast.error(err.response?.data?.message || 'Invalid verification code');
     }
     setLoading(false);
   };
@@ -102,14 +115,14 @@ const Login = () => {
       <div className="page-header" style={{ marginTop: 'var(--space-xl)' }}>
         <div className="badge badge--primary mb-sm">Secure Authentication</div>
         <h1 className="page-title">Voter Sign In</h1>
-        <p className="page-subtitle">3-Factor Identity Verification: Aadhaar • OTP • Biometric Face</p>
+        <p className="page-subtitle">3-Factor Identity Verification: Aadhaar • Email Code • Biometric Face</p>
       </div>
 
       {/* Stepper Header */}
       <div className="steps">
         {[
           { label: 'Aadhaar', icon: <HiOutlineLockClosed /> },
-          { label: 'Mobile OTP', icon: <HiOutlineDeviceMobile /> },
+          { label: 'Email Code', icon: <HiOutlineMail /> },
           { label: 'Face AI', icon: <HiOutlineCamera /> }
         ].map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
@@ -193,40 +206,49 @@ const Login = () => {
         <motion.div key="step2" variants={stepVariants} initial="enter" animate="center" exit="exit"
           className="glass-card glass-card--no-hover">
           <div className="flex items-center gap-sm mb-md">
-            <div className="feature-card__icon stat-card__icon--info" style={{ width: 42, height: 42, marginBottom: 0 }}>
-              <HiOutlineDeviceMobile size={22} />
+            <div className="feature-card__icon stat-card__icon--primary" style={{ width: 42, height: 42, marginBottom: 0 }}>
+              <HiOutlineMail size={22} />
             </div>
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                Mobile OTP Verification
+                Email Verification Code
               </h2>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                Identity matched: <strong style={{ color: '#fbbf24' }}>{userName}</strong>
+                Identity matched: <strong style={{ color: '#2563eb' }}>{userName}</strong>
               </p>
             </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label">Registered Mobile Number (Registered: {maskedMobile})</label>
+            <label className="form-label">
+              Registered Voter Email Address {maskedEmail && `(${maskedEmail})`}
+            </label>
             <div className="flex gap-sm">
               <input
-                type="text"
+                type="email"
                 className="form-input"
-                placeholder="Enter 10-digit mobile"
-                value={mobile}
-                onChange={e => setMobile(e.target.value.replace(/\D/g, ''))}
-                maxLength={10}
+                placeholder="voter@example.com"
+                value={userEmail}
+                onChange={e => setUserEmail(e.target.value)}
                 style={{ flex: 1 }}
               />
-              <button className="btn btn-secondary" onClick={handleSendOTP} disabled={loading || mobile.length !== 10}>
-                {loading ? 'Sending...' : 'Send OTP'}
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={handleSendOTP} 
+                disabled={loading || !userEmail}
+              >
+                {loading ? 'Sending...' : (otpSent ? 'Resend Code' : 'Send Code')}
               </button>
             </div>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 4, display: 'block' }}>
+              Verification email is dispatched from <strong>ehterballotproject@gmail.com</strong>
+            </span>
           </div>
 
           {devOtp && (
             <div className="badge badge--warning mb-md animate-fade-in" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', width: '100%' }}>
-              <span>🔑 Test OTP: <strong>{devOtp}</strong></span>
+              <span>🔑 Test Code: <strong>{devOtp}</strong></span>
               <button 
                 onClick={() => setOtp(devOtp)} 
                 style={{ background: 'none', color: '#fbbf24', fontWeight: 700, textDecoration: 'underline' }}
@@ -237,7 +259,7 @@ const Login = () => {
           )}
 
           <div className="form-group">
-            <label className="form-label">Enter 6-Digit OTP</label>
+            <label className="form-label">Enter 6-Digit Email Verification Code</label>
             <input
               type="text"
               className="form-input"
@@ -254,7 +276,7 @@ const Login = () => {
             onClick={handleVerifyOTP} 
             disabled={loading || otp.length !== 6}
           >
-            {loading ? 'Verifying OTP...' : 'Verify & Proceed to Face Scan →'}
+            {loading ? 'Verifying Code...' : 'Verify & Proceed to Face Scan →'}
           </button>
 
           <button

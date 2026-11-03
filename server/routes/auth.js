@@ -6,7 +6,7 @@ const User = require('../models/User');
 const VerificationToken = require('../models/VerificationToken');
 const AuditLog = require('../models/AuditLog');
 const { protect, generateToken } = require('../middleware/auth');
-const { sendVerificationEmail } = require('../services/emailService');
+const { sendVerificationEmail, sendOtpEmail } = require('../services/emailService');
 
 // Simulated OTP store (in production, use Redis or similar)
 const otpStore = new Map();
@@ -61,34 +61,87 @@ router.post('/validate-aadhaar', async (req, res) => {
 // POST /api/auth/send-otp
 router.post('/send-otp', async (req, res) => {
   try {
-    const { mobile } = req.body;
+    const { email, mobile } = req.body;
 
-    if (!mobile || !/^\d{10}$/.test(mobile)) {
+    if (!email && !mobile) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid mobile number. Must be 10 digits.'
+        message: 'Please provide an email address or mobile number.'
       });
     }
 
-    // Generate 6-digit OTP
+    // Generate 6-digit verification code
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    // Store OTP with 5-minute expiry
-    otpStore.set(mobile, {
-      otp,
-      expiry: Date.now() + 5 * 60 * 1000,
-      attempts: 0
-    });
 
-    // In production: send SMS via Twilio/MSG91
-    console.log(`📱 OTP for ${mobile}: ${otp}`);
+    // Primary: Email verification code
+    if (email) {
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email address format.'
+        });
+      }
 
-    res.json({
-      success: true,
-      message: 'OTP sent successfully',
-      // Include OTP in dev mode for testing
-      ...(process.env.NODE_ENV === 'development' && { otp })
-    });
+      const normalizedEmail = email.toLowerCase().trim();
+      otpStore.set(normalizedEmail, {
+        otp,
+        expiry: Date.now() + 5 * 60 * 1000,
+        attempts: 0
+      });
+
+      // Try to find user name if exists
+      const existingUser = await User.findOne({ email: normalizedEmail });
+      const recipientName = existingUser ? existingUser.name : 'Citizen';
+
+      let emailSent = false;
+      let emailError = null;
+      try {
+        await sendOtpEmail({
+          to: normalizedEmail,
+          name: recipientName,
+          otp
+        });
+        emailSent = true;
+      } catch (err) {
+        console.error(`❌ Failed to send OTP email to ${normalizedEmail}:`, err.message);
+        emailError = err.message;
+      }
+
+      return res.json({
+        success: true,
+        message: emailSent
+          ? `Verification code dispatched to ${normalizedEmail}`
+          : `Verification code generated. (Email delivery error: ${emailError})`,
+        emailSent,
+        // Include OTP in dev mode for testing
+        ...(process.env.NODE_ENV === 'development' && { otp })
+      });
+    }
+
+    // Fallback: Mobile verification code (if mobile explicitly requested)
+    if (mobile) {
+      if (!/^\d{10}$/.test(mobile)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid mobile number. Must be 10 digits.'
+        });
+      }
+
+      otpStore.set(mobile, {
+        otp,
+        expiry: Date.now() + 5 * 60 * 1000,
+        attempts: 0
+      });
+
+      console.log(`📱 OTP for ${mobile}: ${otp}`);
+
+      return res.json({
+        success: true,
+        message: 'OTP sent successfully',
+        // Include OTP in dev mode for testing
+        ...(process.env.NODE_ENV === 'development' && { otp })
+      });
+    }
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -97,53 +150,67 @@ router.post('/send-otp', async (req, res) => {
 // POST /api/auth/verify-otp
 router.post('/verify-otp', async (req, res) => {
   try {
-    const { mobile, otp } = req.body;
+    const { email, mobile, otp } = req.body;
 
-    const stored = otpStore.get(mobile);
+    const targetKey = email ? email.toLowerCase().trim() : mobile;
+
+    if (!targetKey) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email address or mobile number is required'
+      });
+    }
+
+    const stored = otpStore.get(targetKey);
     if (!stored) {
       return res.status(400).json({
         success: false,
-        message: 'No OTP found. Please request a new OTP.'
+        message: 'No verification code found. Please request a new code.'
       });
     }
 
     if (Date.now() > stored.expiry) {
-      otpStore.delete(mobile);
+      otpStore.delete(targetKey);
       return res.status(400).json({
         success: false,
-        message: 'OTP has expired. Please request a new one.'
+        message: 'Verification code has expired. Please request a new code.'
       });
     }
 
     if (stored.attempts >= 3) {
-      otpStore.delete(mobile);
+      otpStore.delete(targetKey);
       return res.status(400).json({
         success: false,
-        message: 'Too many attempts. Please request a new OTP.'
+        message: 'Too many failed attempts. Please request a new code.'
       });
     }
 
-    if (stored.otp !== otp) {
+    if (stored.otp !== String(otp).trim()) {
       stored.attempts++;
       return res.status(400).json({
         success: false,
-        message: 'Invalid OTP'
+        message: 'Invalid verification code'
       });
     }
 
     // OTP verified
-    otpStore.delete(mobile);
+    otpStore.delete(targetKey);
+
+    // If verified by email, update emailVerified in DB if user exists
+    if (email) {
+      await User.updateOne({ email: targetKey }, { emailVerified: true });
+    }
 
     await AuditLog.create({
       action: 'OTP_VERIFIED',
       performedBy: { userType: 'voter' },
-      details: `OTP verified for mobile: ${mobile.slice(-4)}`,
+      details: `Verification code confirmed for: ${email ? targetKey : `mobile ...${mobile.slice(-4)}`}`,
       success: true
     });
 
     res.json({
       success: true,
-      message: 'OTP verified successfully',
+      message: 'Verification code confirmed successfully',
       verified: true
     });
   } catch (error) {
@@ -363,6 +430,7 @@ router.post('/login', async (req, res) => {
       requiresOTP: true,
       requiresFace: true,
       email: user.email ? (user.email.slice(0, 2) + '***@' + user.email.split('@')[1]) : null,
+      rawEmail: user.email,
       emailVerified: !!user.emailVerified
     });
   } catch (error) {
