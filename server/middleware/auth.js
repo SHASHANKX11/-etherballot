@@ -31,7 +31,7 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Not authorized - malformed token' });
     }
 
-    if (decoded.role === 'voter') {
+    if (decoded.role === 'voter' || decoded.role === 'user' || decoded.role === 'admin') {
       req.user = await User.findById(decoded.id).select('-faceDescriptor');
       if (!req.user) {
         return res.status(401).json({ success: false, message: 'User not found' });

@@ -16,11 +16,11 @@ const CyberBackground = () => {
     const particleCount = Math.min(Math.floor((width * height) / 18000), 65);
     const particles = [];
     const colors = [
-      { r: 37, g: 99, b: 235 },   // Royal Blue
-      { r: 2, g: 132, b: 199 },   // Electric Cyan
-      { r: 99, g: 102, b: 241 },  // Neon Indigo
-      { r: 5, g: 150, b: 105 },   // Sovereign Emerald
-      { r: 217, g: 119, b: 6 }    // Saffron Gold
+      { r: 37, g: 99, b: 235 },   // Royal Blue (#2563eb)
+      { r: 56, g: 189, b: 248 },  // Electric Light Blue (#38bdf8)
+      { r: 125, g: 211, b: 252 }, // Sky Light Blue (#7dd3fc)
+      { r: 255, g: 255, b: 255 }, // Crisp White (#ffffff)
+      { r: 29, g: 78, b: 216 }    // Deep Blue (#1d4ed8)
     ];
 
     // Floating 3D Geometric Prisms / Wireframe Hexagons
@@ -271,14 +271,14 @@ const CyberBackground = () => {
           pointer-events: none;
           z-index: 0;
           overflow: hidden;
-          background: #f8fafc;
+          background: linear-gradient(135deg, #f8fbff 0%, #eef5fc 100%);
         }
         .cyber-grid-mesh {
           position: absolute;
           inset: 0;
           background-image: 
-            linear-gradient(rgba(37, 99, 235, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(37, 99, 235, 0.03) 1px, transparent 1px);
+            linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
           background-size: 40px 40px;
           background-position: center center;
           opacity: 0.85;
@@ -292,14 +292,14 @@ const CyberBackground = () => {
         .cyber-aurora {
           position: absolute;
           border-radius: 50%;
-          filter: blur(95px);
-          opacity: 0.18;
+          filter: blur(110px);
+          opacity: 0.35;
           pointer-events: none;
         }
         .cyber-aurora--1 {
           width: 650px;
           height: 650px;
-          background: radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, rgba(99, 102, 241, 0.15) 50%, transparent 70%);
+          background: radial-gradient(circle, rgba(37, 99, 235, 0.45) 0%, rgba(99, 102, 241, 0.2) 50%, transparent 70%);
           top: -12%;
           left: -8%;
           animation: auroraDrift1 22s ease-in-out infinite alternate;
@@ -307,7 +307,7 @@ const CyberBackground = () => {
         .cyber-aurora--2 {
           width: 600px;
           height: 600px;
-          background: radial-gradient(circle, rgba(99, 102, 241, 0.32) 0%, rgba(2, 132, 199, 0.15) 50%, transparent 70%);
+          background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(2, 132, 199, 0.22) 50%, transparent 70%);
           bottom: -12%;
           right: -8%;
           animation: auroraDrift2 26s ease-in-out infinite alternate;
@@ -315,7 +315,7 @@ const CyberBackground = () => {
         .cyber-aurora--3 {
           width: 500px;
           height: 500px;
-          background: radial-gradient(circle, rgba(2, 132, 199, 0.28) 0%, rgba(5, 150, 105, 0.15) 50%, transparent 70%);
+          background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(5, 150, 105, 0.18) 50%, transparent 70%);
           top: 35%;
           left: 42%;
           animation: auroraDrift3 20s ease-in-out infinite alternate;
@@ -323,7 +323,7 @@ const CyberBackground = () => {
         .cyber-aurora--4 {
           width: 420px;
           height: 420px;
-          background: radial-gradient(circle, rgba(217, 119, 6, 0.18) 0%, rgba(37, 99, 235, 0.1) 50%, transparent 70%);
+          background: radial-gradient(circle, rgba(217, 119, 6, 0.25) 0%, rgba(37, 99, 235, 0.15) 50%, transparent 70%);
           bottom: 20%;
           left: 10%;
           animation: auroraDrift1 28s ease-in-out infinite alternate-reverse;

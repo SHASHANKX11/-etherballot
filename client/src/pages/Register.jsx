@@ -10,7 +10,6 @@ import {
   HiOutlineUser, 
   HiOutlineCheckCircle, 
   HiOutlineLocationMarker,
-  HiOutlineDeviceMobile,
   HiOutlineShieldCheck,
   HiOutlineMail
 } from 'react-icons/hi';
@@ -180,9 +179,9 @@ const Register = () => {
         ...formData,
         faceDescriptor
       });
-      toast.success(res.data.message || 'Registration successful! Welcome to EtherBallot 🎉');
+      toast.success(res.data.message || 'Registration successful! Digital Voter ID generated 🎉');
       loginVoter(res.data.token, res.data.user);
-      navigate(`/check-email?email=${encodeURIComponent(formData.email)}`);
+      navigate('/voter-card');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
     }
@@ -383,7 +382,7 @@ const Register = () => {
                   src={`https://maps.google.com/maps?q=${userLocation.lat},${userLocation.lng}&z=14&output=embed`} 
                   allowFullScreen>
                 </iframe>
-                <div style={{ padding: '8px 12px', background: '#f1f5f9', borderTop: '1px solid var(--border-primary)', fontSize: '0.85rem', color: '#2563eb', textAlign: 'center', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+                <div style={{ padding: '8px 12px', background: '#05070f', borderTop: '1px solid rgba(56, 189, 248, 0.3)', fontSize: '0.85rem', color: '#38bdf8', textAlign: 'center', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
                   ✅ GPS Coordinates: {userLocation.lat.toFixed(4)}° N, {userLocation.lng.toFixed(4)}° E
                 </div>
               </div>
@@ -393,7 +392,7 @@ const Register = () => {
           {/* Email Verification Code Section */}
           <div className="form-group" style={{ borderTop: '1px solid var(--border-secondary)', paddingTop: 'var(--space-lg)', marginTop: 'var(--space-lg)' }}>
             <label className="form-label">
-              <HiOutlineMail style={{ color: '#2563eb' }} /> Email Verification Code *
+              <HiOutlineMail style={{ color: '#38bdf8' }} /> Email Verification Code *
             </label>
             <div className="flex gap-sm">
               <input
@@ -420,12 +419,12 @@ const Register = () => {
           </div>
 
           {devOtp && !otpVerified && (
-            <div className="badge badge--warning mb-md animate-fade-in" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', width: '100%' }}>
+            <div className="badge badge--info mb-md animate-fade-in" style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', width: '100%' }}>
               <span>🔑 Test Code: <strong>{devOtp}</strong></span>
               <button 
                 type="button"
                 onClick={() => setOtp(devOtp)} 
-                style={{ background: 'none', color: '#fbbf24', fontWeight: 700, textDecoration: 'underline' }}
+                style={{ background: 'none', color: '#38bdf8', fontWeight: 700, textDecoration: 'underline' }}
               >
                 Auto-fill
               </button>
@@ -434,19 +433,20 @@ const Register = () => {
 
           {otpSent && !otpVerified && (
             <div className="form-group animate-fade-in">
-              <label className="form-label">Enter 6-Digit Email Verification Code</label>
-              <div className="flex gap-sm">
+              <label className="form-label" style={{ textAlign: 'center', display: 'block' }}>Enter 6-Digit Email Verification Code</label>
+              <div className="flex flex-col gap-sm">
                 <input
                   type="text"
-                  className="form-input"
-                  placeholder="e.g. 123456"
+                  className="form-input otp-input-code"
+                  placeholder="••••••"
                   value={otp}
                   onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
                   maxLength={6}
-                  style={{ flex: 1 }}
+                  style={{ width: '100%' }}
                   onKeyDown={e => e.key === 'Enter' && handleVerifyOTP()}
+                  autoFocus
                 />
-                <button type="button" className="btn btn-success" onClick={handleVerifyOTP} disabled={loading || otp.length !== 6}>
+                <button type="button" className="btn btn-primary btn-lg btn-block" onClick={handleVerifyOTP} disabled={loading || otp.length !== 6}>
                   Verify Code
                 </button>
               </div>

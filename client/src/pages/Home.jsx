@@ -4,10 +4,8 @@ import {
   HiOutlineShieldCheck, 
   HiOutlineFingerPrint, 
   HiOutlineCube, 
-  HiOutlineChartBar, 
   HiOutlineLockClosed, 
   HiOutlineGlobe, 
-  HiOutlineUserGroup, 
   HiOutlineClipboardList, 
   HiOutlineExternalLink,
   HiOutlineSearch,
@@ -17,14 +15,19 @@ import {
   HiOutlinePhone,
   HiOutlineSparkles,
   HiOutlineHeart,
-  HiOutlineDownload
+  HiOutlineDownload,
+  HiOutlineCamera,
+  HiOutlineQrcode
 } from 'react-icons/hi';
 import AnimatedEmblem from '../components/AnimatedEmblem';
 import VoterSearchModal from '../components/VoterSearchModal';
+import HeroAnimationFrame from '../components/HeroAnimationFrame';
+import HomeQRScannerModal from '../components/HomeQRScannerModal';
 
 const Home = () => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [modalDefaultTab, setModalDefaultTab] = useState('search');
+  const [qrScannerOpen, setQrScannerOpen] = useState(false);
 
   const openSearch = (tab = 'search') => {
     setModalDefaultTab(tab);
@@ -58,7 +61,7 @@ const Home = () => {
       desc: 'Objection to proposed inclusion or deletion of existing name from electoral roll.',
       link: '/register',
       tag: 'Corrections',
-      color: '#d97706'
+      color: '#38bdf8'
     },
     {
       formNo: 'Form 8',
@@ -67,12 +70,19 @@ const Home = () => {
       desc: 'Correction of particulars (Name, Photo, DOB, Address, Mobile) in electoral record.',
       link: '/register',
       tag: 'Updates',
-      color: '#059669'
+      color: '#2563eb'
     }
   ];
 
   // Citizen Quick Services Grid
   const quickServices = [
+    {
+      icon: <HiOutlineCamera size={26} />,
+      title: 'Scan & Verify Voter QR',
+      titleHi: 'कैमरा स्कैनर से मतदाता पहचान सत्यापित करें',
+      desc: 'Use live camera to scan any Digital Voter ID Card, verify registration in application DB, and get full elector details.',
+      action: () => setQrScannerOpen(true)
+    },
     {
       icon: <HiOutlineSearch size={26} />,
       title: 'Search in Electoral Roll',
@@ -128,6 +138,9 @@ const Home = () => {
 
   return (
     <div className="gov-home-page" id="main-content">
+      {/* ═══ CINEMATIC HERO ANIMATION FRAME ═══ */}
+      <HeroAnimationFrame />
+
       {/* ═══ OFFICIAL GAZETTE & PRESS MARQUEE ═══ */}
       <div className="gov-news-ticker">
         <div className="gov-news-ticker__label">
@@ -180,9 +193,17 @@ const Home = () => {
               <Link to="/register" className="btn btn-primary btn-lg card-interactive">
                 📝 Register as New Voter (Form 6)
               </Link>
-              <button onClick={() => openSearch('search')} className="btn btn-secondary btn-lg card-interactive">
-                🔍 Search in Electoral Roll / e-EPIC
+              <button 
+                type="button"
+                onClick={() => setQrScannerOpen(true)}
+                className="btn btn-primary btn-lg card-interactive" 
+                style={{ background: '#091e42', borderColor: '#38bdf8', color: '#ffffff' }}
+              >
+                📷 Scan Voter QR (Camera)
               </button>
+              <Link to="/voter-card" className="btn btn-secondary btn-lg card-interactive">
+                🪪 Digital Voter ID Card
+              </Link>
               <Link to="/login" className="btn btn-ghost btn-lg card-interactive">
                 🔐 Voter Sign In
               </Link>
@@ -191,7 +212,7 @@ const Home = () => {
             {/* Sovereign Credential Badges */}
             <div className="gov-hero__badges-row">
               <div className="gov-cred-badge shimmer-badge">
-                <HiOutlineShieldCheck style={{ color: '#059669' }} />
+                <HiOutlineShieldCheck style={{ color: '#0284c7' }} />
                 <span>Constitutional Integrity</span>
               </div>
               <div className="gov-cred-badge shimmer-badge">
@@ -199,11 +220,11 @@ const Home = () => {
                 <span>zk-SNARKs Anonymity</span>
               </div>
               <div className="gov-cred-badge shimmer-badge">
-                <HiOutlineFingerPrint style={{ color: '#d97706' }} />
+                <HiOutlineFingerPrint style={{ color: '#38bdf8' }} />
                 <span>AI Face Liveness</span>
               </div>
               <div className="gov-cred-badge shimmer-badge">
-                <HiOutlineGlobe style={{ color: '#0284c7' }} />
+                <HiOutlineGlobe style={{ color: '#1d4ed8' }} />
                 <span>24x7 Digital Access</span>
               </div>
             </div>
@@ -232,6 +253,14 @@ const Home = () => {
 
               <button 
                 className="btn btn-primary btn-block mb-sm card-interactive"
+                style={{ background: '#091e42', borderColor: '#38bdf8', color: '#ffffff' }}
+                onClick={() => setQrScannerOpen(true)}
+              >
+                <HiOutlineCamera /> 📷 Scan Voter ID QR (Camera)
+              </button>
+
+              <button 
+                className="btn btn-secondary btn-block mb-sm card-interactive"
                 onClick={() => openSearch('search')}
               >
                 <HiOutlineSearch /> Search by EPIC / Aadhaar No.
@@ -442,11 +471,16 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Modal */}
+      {/* Modals */}
       <VoterSearchModal
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}
         defaultTab={modalDefaultTab}
+      />
+
+      <HomeQRScannerModal
+        isOpen={qrScannerOpen}
+        onClose={() => setQrScannerOpen(false)}
       />
 
       <style>{`
@@ -507,7 +541,7 @@ const Home = () => {
           font-family: 'Noto Sans Devanagari', sans-serif;
           font-size: 0.85rem;
           font-weight: 700;
-          color: #ff9933;
+          color: #38bdf8;
         }
         .gov-hero__org-title {
           font-family: var(--font-heading);
@@ -671,8 +705,8 @@ const Home = () => {
 
         /* ─── SVEEP Banner ─── */
         .gov-sveep-banner {
-          background: linear-gradient(135deg, rgba(255, 153, 51, 0.08) 0%, rgba(255, 255, 255, 0.95) 50%, rgba(19, 136, 8, 0.08) 100%);
-          border: 2px solid #cbd5e1;
+          background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(255, 255, 255, 0.98) 50%, rgba(37, 99, 235, 0.10) 100%);
+          border: 2px solid rgba(56, 189, 248, 0.3);
           padding: var(--space-2xl);
         }
 

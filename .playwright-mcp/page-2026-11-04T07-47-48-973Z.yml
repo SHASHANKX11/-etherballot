@@ -1,0 +1,303 @@
+- generic [ref=e3]:
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - link "Skip to main content" [ref=e8] [cursor=pointer]:
+        - /url: "#main-content"
+      - generic [ref=e9]: भारत सरकार
+      - generic [ref=e10]: "|"
+      - generic [ref=e11]: Government of India
+      - generic [ref=e12]: "|"
+      - generic [ref=e13]: Digital India Sovereign Portal
+    - generic [ref=e14]:
+      - link [ref=e15] [cursor=pointer]:
+        - /url: tel:1950
+        - generic [ref=e18]:
+          - text: "Voter Helpline:"
+          - strong [ref=e19]: "1950"
+          - text: (Toll-Free)
+      - generic [ref=e20]: "|"
+      - generic "Font Size Controls" [ref=e21]:
+        - button "A-" [ref=e22] [cursor=pointer]
+        - button "A" [ref=e23] [cursor=pointer]
+        - button "A+" [ref=e24] [cursor=pointer]
+      - generic [ref=e25]: "|"
+      - generic [ref=e26]:
+        - button "English" [ref=e29] [cursor=pointer]
+        - generic [ref=e30]: /
+        - button "हिन्दी" [ref=e31] [cursor=pointer]
+  - navigation [ref=e32]:
+    - generic [ref=e33]:
+      - link "State Emblem of India - Satyameva Jayate भारत निर्वाचन आयोग ELECTION COMMISSION OF INDIA EtherBallot • Decentralized Autonomous Voting Infrastructure" [ref=e34] [cursor=pointer]:
+        - /url: /
+        - img "State Emblem of India - Satyameva Jayate" [ref=e37]
+        - generic [ref=e38]:
+          - generic [ref=e39]: भारत निर्वाचन आयोग
+          - generic [ref=e40]: ELECTION COMMISSION OF INDIA
+          - generic [ref=e41]:
+            - strong [ref=e42]: EtherBallot
+            - text: • Decentralized Autonomous Voting Infrastructure
+      - button "Search in Electoral Roll / e-EPIC" [ref=e44] [cursor=pointer]
+      - generic [ref=e48]:
+        - link "Home" [ref=e49] [cursor=pointer]:
+          - /url: /
+        - link "Election Results" [ref=e50] [cursor=pointer]:
+          - /url: /results
+      - generic [ref=e52]:
+        - link "Voter Login" [ref=e53] [cursor=pointer]:
+          - /url: /login
+        - link "Form 6 (Register)" [ref=e54] [cursor=pointer]:
+          - /url: /register
+        - link "Official Portal" [ref=e55] [cursor=pointer]:
+          - /url: /admin/login
+  - main [ref=e58]:
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic [ref=e61]: आधिकारिक सूचना / OFFICIAL PRESS NOTE
+        - generic [ref=e64]:
+          - generic [ref=e65]: "📢 Special Summary Revision of Electoral Roll 2026: Qualifying date 01-01-2026. Enroll now using Form 6."
+          - generic [ref=e66]: 🔒 All electors are requested to link their verified mobile number for biometric e-voting enablement.
+          - generic [ref=e67]: ⚡ Decentralized Autonomous Voting Prototype active under academic pilot demonstration.
+          - generic [ref=e68]: "📢 Special Summary Revision of Electoral Roll 2026: Qualifying date 01-01-2026. Enroll now using Form 6."
+          - generic [ref=e69]: 🔒 All electors are requested to link their verified mobile number for biometric e-voting enablement.
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - img "State Emblem of India - Satyameva Jayate" [ref=e76] [cursor=pointer]
+            - generic [ref=e77]:
+              - generic [ref=e78]: भारत सरकार • निर्वाचन आयोग
+              - heading "ELECTION COMMISSION OF INDIA" [level=1] [ref=e79]
+              - generic [ref=e80]: National Voters’ Service Portal • EtherBallot Decentralized Platform
+          - heading "Sovereign Digital Electoral Roll & Voting Infrastructure" [level=2] [ref=e81]
+          - paragraph [ref=e82]: Welcome to the official decentralized voting and electoral services portal. Empowering every Indian citizen with self-sovereign identity, biometric face liveness authentication, and immutable smart contract vote tabulation.
+          - generic [ref=e83]:
+            - link "📝 Register as New Voter (Form 6)" [ref=e84] [cursor=pointer]:
+              - /url: /register
+            - button "🔍 Search in Electoral Roll / e-EPIC" [ref=e85] [cursor=pointer]
+            - link "🔐 Voter Sign In" [ref=e86] [cursor=pointer]:
+              - /url: /login
+          - generic [ref=e87]:
+            - generic [ref=e88]: Constitutional Integrity
+            - generic [ref=e92]: zk-SNARKs Anonymity
+            - generic [ref=e96]: AI Face Liveness
+            - generic [ref=e100]: 24x7 Digital Access
+        - generic [ref=e104]:
+          - generic [ref=e105]:
+            - generic [ref=e106]:
+              - img "State Emblem of India - Satyameva Jayate" [ref=e109] [cursor=pointer]
+              - generic [ref=e110]: Quick Electoral Roll Lookup
+            - generic [ref=e111]: LIVE ROLL
+          - generic [ref=e114]:
+            - paragraph [ref=e115]: Instant verification of citizen enrollment status, polling station location, and e-EPIC generation.
+            - button "Search by EPIC / Aadhaar No." [ref=e116] [cursor=pointer]
+            - button "Track Form Reference ID" [ref=e119] [cursor=pointer]
+            - generic [ref=e122]:
+              - text: 💡 Need assistance? Call National Voter Helpline
+              - strong [ref=e123]: "1950"
+              - text: (Toll-Free).
+      - generic [ref=e125]:
+        - generic [ref=e126]:
+          - generic [ref=e127]: Voter Services Directory
+          - heading "National Voter Portal Services (मतदाता सेवा पोर्टल)" [level=2] [ref=e130]
+          - paragraph [ref=e131]: Single window access for electoral registration, modifications, digital e-EPIC, and grievance redressal.
+        - generic [ref=e132]:
+          - generic [ref=e133] [cursor=pointer]:
+            - heading "Search in Electoral Roll" [level=3] [ref=e137]
+            - generic [ref=e138]: मतदाता सूची में नाम खोजें
+            - paragraph [ref=e139]: Verify your name, polling station, and serial number in the active roll.
+            - generic [ref=e140]: Access Service →
+          - generic [ref=e141] [cursor=pointer]:
+            - heading "Download Digital e-EPIC" [level=3] [ref=e145]
+            - generic [ref=e146]: ई-ईपिक कार्ड डाउनलोड करें
+            - paragraph [ref=e147]: Secure cryptographic digital voter identity card with QR signature.
+            - generic [ref=e148]: Access Service →
+          - generic [ref=e149] [cursor=pointer]:
+            - heading "Track Application Status" [level=3] [ref=e153]
+            - generic [ref=e154]: आवेदन की स्थिति जानें
+            - paragraph [ref=e155]: Real-time tracking of Form 6 / 8 submission via Reference ID.
+            - generic [ref=e156]: Access Service →
+          - generic [ref=e157] [cursor=pointer]:
+            - heading "Know Polling Station & BLO" [level=3] [ref=e162]
+            - generic [ref=e163]: मतदान केंद्र व बीएलओ की जानकारी
+            - paragraph [ref=e164]: Locate designated Booth Level Officer, Electoral Registration Officer & Polling Booth.
+            - generic [ref=e165]: Access Service →
+        - heading "Electoral Registration Forms (मतदाता पंजीकरण प्रपत्र)" [level=3] [ref=e167]
+        - generic [ref=e168]:
+          - generic [ref=e169]:
+            - generic [ref=e170]:
+              - generic [ref=e171]: Form 6
+              - generic [ref=e172]: Most Popular
+            - heading "New Voter Registration" [level=4] [ref=e173]
+            - generic [ref=e174]: नए मतदाता के रूप में पंजीकरण
+            - paragraph [ref=e175]: Application for first-time electors (18+) or shifting from other constituency.
+            - link "Fill Form 6 Online →" [ref=e176] [cursor=pointer]:
+              - /url: /register
+          - generic [ref=e177]:
+            - generic [ref=e178]:
+              - generic [ref=e179]: Form 6A
+              - generic [ref=e180]: NRI Electors
+            - heading "Overseas Elector Registration" [level=4] [ref=e181]
+            - generic [ref=e182]: प्रवासी निर्वाचक के रूप में पंजीकरण
+            - paragraph [ref=e183]: Application for Indian citizens residing outside India to enroll in electoral roll.
+            - link "Fill Form 6A Online →" [ref=e184] [cursor=pointer]:
+              - /url: /register
+          - generic [ref=e185]:
+            - generic [ref=e186]:
+              - generic [ref=e187]: Form 7
+              - generic [ref=e188]: Corrections
+            - heading "Objection / Deletion in Roll" [level=4] [ref=e189]
+            - generic [ref=e190]: मतदाता सूची में नाम हटाने हेतु आवेदन
+            - paragraph [ref=e191]: Objection to proposed inclusion or deletion of existing name from electoral roll.
+            - link "Fill Form 7 Online →" [ref=e192] [cursor=pointer]:
+              - /url: /register
+          - generic [ref=e193]:
+            - generic [ref=e194]:
+              - generic [ref=e195]: Form 8
+              - generic [ref=e196]: Updates
+            - heading "Correction & Shifting of Residence" [level=4] [ref=e197]
+            - generic [ref=e198]: निवास परिवर्तन / प्रविष्टियों में सुधार
+            - paragraph [ref=e199]: Correction of particulars (Name, Photo, DOB, Address, Mobile) in electoral record.
+            - link "Fill Form 8 Online →" [ref=e200] [cursor=pointer]:
+              - /url: /register
+      - generic [ref=e204]:
+        - generic [ref=e205]: SVEEP Initiative • मतदानाचा हक्क
+        - heading "“No Voter to be Left Behind” • कोई भी मतदाता न छूटे" [level=2] [ref=e208]
+        - paragraph [ref=e209]: Systematic Voters’ Education and Electoral Participation (SVEEP) is the flagship program of the Election Commission of India for voter education, spreading voter awareness, and promoting voter literacy across the nation.
+        - generic [ref=e210]:
+          - link "🗳️ Participate in Active Ballot" [ref=e211] [cursor=pointer]:
+            - /url: /vote
+          - link "📊 View Verified Election Audits" [ref=e212] [cursor=pointer]:
+            - /url: /results
+      - generic [ref=e214]:
+        - generic [ref=e215]:
+          - generic [ref=e216]: Technology & Sovereign Trust
+          - heading "Decentralized Autonomous Architecture" [level=2] [ref=e217]
+          - paragraph [ref=e218]: Engineered with zero-trust cryptographic verification, biometric machine learning, and transparent audit trails.
+        - generic [ref=e219]:
+          - generic [ref=e220]:
+            - heading "Blockchain Immutability" [level=3] [ref=e224]
+            - paragraph [ref=e225]: Ballot tallies and transactions are cryptographically sealed on an Ethereum smart contract ledger.
+          - generic [ref=e226]:
+            - heading "AI Face Liveness Verification" [level=3] [ref=e230]
+            - paragraph [ref=e231]: Neural vision checks 128-D facial embeddings and micro-blinks to prevent synthetic spoofing.
+          - generic [ref=e232]:
+            - heading "Aadhaar Identity Integrity" [level=3] [ref=e236]
+            - paragraph [ref=e237]: Guarantees the Constitutional principle of one-person-one-vote via SHA-256 validation.
+          - generic [ref=e238]:
+            - heading "End-to-End Zero-Knowledge" [level=3] [ref=e242]
+            - paragraph [ref=e243]: Voter ballot choices remain mathematically secret and anonymous through zk-SNARKs.
+      - generic [ref=e245]:
+        - generic [ref=e246]:
+          - generic [ref=e247]: Sovereign Portal Interoperability
+          - heading "Citizen Welfare & Public Data Directory" [level=2] [ref=e250]
+          - paragraph [ref=e251]: Direct access to open government portals, citizen registries, and public welfare schemes.
+        - generic [ref=e252]:
+          - generic [ref=e253] [cursor=pointer]:
+            - generic [ref=e254]: National Informatics Centre
+            - heading "National Portal of India (india.gov.in)" [level=3] [ref=e255]
+            - paragraph [ref=e256]: Single-entry window to all information and services provided by the Indian Government.
+            - generic [ref=e257]: Visit Official Portal
+          - generic [ref=e261] [cursor=pointer]:
+            - generic [ref=e262]: Ministry of Electronics & IT
+            - heading "Digital India Mission (digitalindia.gov.in)" [level=3] [ref=e263]
+            - paragraph [ref=e264]: Flagship programme to transform India into a digitally empowered society and knowledge economy.
+            - generic [ref=e265]: Visit Official Portal
+          - generic [ref=e269] [cursor=pointer]:
+            - generic [ref=e270]: Government of India
+            - heading "Unique Identification Authority (UIDAI)" [level=3] [ref=e271]
+            - paragraph [ref=e272]: Aadhaar identity verification and secure authentication infrastructure for residents.
+            - generic [ref=e273]: Visit Official Portal
+          - generic [ref=e277] [cursor=pointer]:
+            - generic [ref=e278]: Ministry of Communications
+            - heading "Postal Life Insurance by India Post" [level=3] [ref=e279]
+            - paragraph [ref=e280]: Online application access for citizen life insurance and financial security plans.
+            - generic [ref=e281]: Visit Official Portal
+          - generic [ref=e285] [cursor=pointer]:
+            - generic [ref=e286]: Ministry of Rural Development
+            - heading "National Social Assistance Programme (NSAP)" [level=3] [ref=e287]
+            - paragraph [ref=e288]: Open datasets regarding verified national beneficiary allocations and welfare disbursements.
+            - generic [ref=e289]: Visit Official Portal
+          - generic [ref=e293] [cursor=pointer]:
+            - generic [ref=e294]: NIC / MeitY
+            - heading "National Open Data Portal (data.gov.in)" [level=3] [ref=e295]
+            - paragraph [ref=e296]: Platform for supporting open data initiative of Government of India.
+            - generic [ref=e297]: Visit Official Portal
+  - contentinfo [ref=e301]:
+    - generic [ref=e305]:
+      - generic [ref=e306]:
+        - heading "National Portals" [level=4] [ref=e307]
+        - list [ref=e308]:
+          - listitem [ref=e309]:
+            - link "National Portal of India (india.gov.in)" [ref=e310] [cursor=pointer]:
+              - /url: https://www.india.gov.in
+          - listitem [ref=e313]:
+            - link "Digital India Initiative" [ref=e314] [cursor=pointer]:
+              - /url: https://digitalindia.gov.in
+          - listitem [ref=e317]:
+            - link "Unique Identification Authority (UIDAI)" [ref=e318] [cursor=pointer]:
+              - /url: https://uidai.gov.in
+          - listitem [ref=e321]:
+            - link "Open Government Data (data.gov.in)" [ref=e322] [cursor=pointer]:
+              - /url: https://data.gov.in
+          - listitem [ref=e325]:
+            - link "MyGov Citizen Engagement" [ref=e326] [cursor=pointer]:
+              - /url: https://mygov.in
+      - generic [ref=e329]:
+        - heading "Electoral Services" [level=4] [ref=e330]
+        - list [ref=e331]:
+          - listitem [ref=e332]:
+            - link "Form 6 - New Voter Registration" [ref=e333] [cursor=pointer]:
+              - /url: /register
+          - listitem [ref=e334]:
+            - link "Form 6A - Overseas Voter Enrollment" [ref=e335] [cursor=pointer]:
+              - /url: /register
+          - listitem [ref=e336]:
+            - link "Form 8 - Shifting & Corrections" [ref=e337] [cursor=pointer]:
+              - /url: /register
+          - listitem [ref=e338]:
+            - link "Electoral Tally & Ledger Audits" [ref=e339] [cursor=pointer]:
+              - /url: /results
+          - listitem [ref=e340]:
+            - link "Voter Biometric Login" [ref=e341] [cursor=pointer]:
+              - /url: /login
+      - generic [ref=e342]:
+        - heading "Website Policies (GIGW)" [level=4] [ref=e343]
+        - list [ref=e344]:
+          - listitem [ref=e345]:
+            - link "Website Policies & Privacy Charter" [ref=e346] [cursor=pointer]:
+              - /url: "#policies"
+          - listitem [ref=e347]:
+            - link "Hyperlinking Policy" [ref=e348] [cursor=pointer]:
+              - /url: "#hyperlink"
+          - listitem [ref=e349]:
+            - link "Copyright & Trademark Policy" [ref=e350] [cursor=pointer]:
+              - /url: "#copyright"
+          - listitem [ref=e351]:
+            - link "Terms & Conditions of Service" [ref=e352] [cursor=pointer]:
+              - /url: "#terms"
+          - listitem [ref=e353]:
+            - link "Help & Screen Reader Access" [ref=e354] [cursor=pointer]:
+              - /url: "#help"
+      - generic [ref=e355]:
+        - heading "National Helpline & Contact" [level=4] [ref=e356]
+        - generic [ref=e360]:
+          - strong [ref=e361]: "Toll-Free Helpline: 1950"
+          - generic [ref=e362]: 24x7 Citizen Assistance Desk
+        - generic [ref=e363]: Nirvachan Sadan, Ashoka Road, New Delhi 110001
+    - generic [ref=e369]:
+      - generic [ref=e370]:
+        - generic [ref=e371]:
+          - img "State Emblem of India - Satyameva Jayate" [ref=e374] [cursor=pointer]
+          - generic [ref=e375]:
+            - generic [ref=e376]: भारत निर्वाचन आयोग • Election Commission of India
+            - generic [ref=e377]: EtherBallot Autonomous Sovereign Portal v2.0 • Hosted & Managed under Academic Pilot Framework
+        - generic [ref=e378]:
+          - generic [ref=e379]: GIGW 3.0 Compliant
+          - generic [ref=e380]: WCAG 2.1 Level AA
+          - generic [ref=e381]: SHA-256 / zk-SNARKs Verified
+          - generic [ref=e382]: v2.0.0
+      - generic [ref=e383]:
+        - generic [ref=e384]: © 2026 Election Commission of India / EtherBallot Project. All rights reserved.
+        - generic [ref=e385]:
+          - text: "Page Last Updated On:"
+          - strong [ref=e386]: 31 August 2026
+          - text: "• Ledger Telemetry: Active"

@@ -19,7 +19,7 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('etherballot_token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = 'Bearer ' + token;
     }
     return config;
   },
@@ -66,17 +66,29 @@ export const authAPI = {
   },
 
   verifyOTP: (target, otp) => {
-    const payload = typeof target === 'string'
-      ? (target.includes('@') ? { email: target, otp } : { mobile: target, otp })
-      : { ...target, otp };
+    // Support both call styles:
+    //   verifyOTP('user@mail.com', '123456')   — target is a string
+    //   verifyOTP({ email, otp })              — target is an object with otp inside
+    let payload;
+    if (typeof target === 'string') {
+      payload = target.includes('@') ? { email: target, otp } : { mobile: target, otp };
+    } else {
+      // When called as verifyOTP({ email, otp }), the 2nd arg is undefined.
+      // Preserve the otp already inside the object instead of overwriting it.
+      payload = otp !== undefined ? { ...target, otp } : { ...target };
+    }
     return api.post('/auth/verify-otp', payload);
   },
 
   register: (userData) =>
     api.post('/auth/register', userData),
 
-  login: (aadhaarNumber) =>
-    api.post('/auth/login', { aadhaarNumber }),
+  login: (identifier) => {
+    const payload = typeof identifier === 'object'
+      ? identifier
+      : (/^\d{12}$/.test(identifier) ? { aadhaarNumber: identifier } : { voterId: identifier, qrToken: identifier });
+    return api.post('/auth/login', payload);
+  },
 
   verifyFace: (userId, faceDescriptor, isDemoBypass = false) =>
     api.post('/auth/login/verify-face', { userId, faceDescriptor, isDemoBypass }),
@@ -88,7 +100,23 @@ export const authAPI = {
     api.post('/auth/resend-verification', { email }),
 
   getMe: () =>
-    api.get('/auth/me')
+    api.get('/auth/me'),
+
+  // Voter ID & QR flows
+  voterVerify: (data) =>
+    api.post('/auth/voter/verify', data),
+
+  voterLogin: (data) =>
+    api.post('/auth/voter/login', data),
+
+  getVoterCard: (voterId) =>
+    api.get(`/auth/voter/card${voterId ? `?voterId=${encodeURIComponent(voterId)}` : ''}`),
+
+  verifyVoterCardQR: (qrData) =>
+    api.post('/auth/voter/verify-card-qr', { qrData }),
+
+  qrRefresh: () =>
+    api.post('/auth/voter/qr-refresh')
 };
 
 // ═══════════════════════════════════════════
@@ -182,6 +210,42 @@ export const voterAPI = {
 
   trackApplication: (refId) =>
     api.get(`/voters/track/${refId}`)
+};
+
+// ═══════════════════════════════════════════
+//  VOTER CARD & QR VERIFICATION API
+// ═══════════════════════════════════════════
+
+export const voterCardAPI = {
+  getMyCard: (params) =>
+    api.get('/voter-card/my-card', { params }),
+
+  getVoterById: (id) =>
+    api.get(`/voter-card/voter/${encodeURIComponent(id)}`),
+
+  verifyScan: (data) =>
+    api.post('/voter-card/verify-scan', data),
+
+  confirmCheckIn: (data) =>
+    api.post('/voter-card/confirm-check-in', data),
+
+  getAdminStats: () =>
+    api.get('/voter-card/admin/stats'),
+
+  getAdminList: (params) =>
+    api.get('/voter-card/admin/list', { params }),
+
+  updateApproval: (data) =>
+    api.post('/voter-card/admin/approval', data),
+
+  revokeQR: (data) =>
+    api.post('/voter-card/admin/revoke-qr', data),
+
+  regenerateQR: (data) =>
+    api.post('/voter-card/admin/regenerate-qr', data),
+
+  getOfficerHistory: () =>
+    api.get('/voter-card/officer/history')
 };
 
 export default api;

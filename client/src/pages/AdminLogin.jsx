@@ -41,7 +41,7 @@ const AdminLogin = () => {
               <AnimatedEmblem size={64} animate={true} />
             </div>
             
-            <div className="badge badge--warning mb-xs">
+            <div className="badge badge--primary mb-xs">
               <HiOutlineShieldCheck /> Election Official
             </div>
             
@@ -56,7 +56,7 @@ const AdminLogin = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label">
-                <HiOutlineUser style={{ color: '#2563eb' }} /> Administrator Username
+                <HiOutlineUser style={{ color: '#38bdf8' }} /> Administrator Username
               </label>
               <input
                 type="text"
@@ -70,7 +70,7 @@ const AdminLogin = () => {
             
             <div className="form-group">
               <label className="form-label">
-                <HiOutlineLockClosed style={{ color: '#2563eb' }} /> Password
+                <HiOutlineLockClosed style={{ color: '#38bdf8' }} /> Password
               </label>
               <input
                 type="password"

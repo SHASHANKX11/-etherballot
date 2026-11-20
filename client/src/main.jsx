@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { Web3Provider } from './context/Web3Context.jsx'
 import './index.css'
 
 // ─── Loading spinner shown during lazy page chunk loading ─────────────────────
@@ -38,10 +39,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <Suspense fallback={<PageLoader />}>
-          <App />
-        </Suspense>
-        <Toaster
+        <Web3Provider>
+          <Suspense fallback={<PageLoader />}>
+            <App />
+          </Suspense>
+          <Toaster
           position="top-right"
           toastOptions={{
             duration: 4500,
@@ -64,6 +66,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             },
           }}
         />
+        </Web3Provider>
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>,

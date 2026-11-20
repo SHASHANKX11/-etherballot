@@ -11,7 +11,7 @@ const { protect, authorize } = require('../middleware/auth');
 // ═══════════════════════════════════════════
 
 // POST /api/voting/cast
-router.post('/cast', protect, authorize('voter'), async (req, res) => {
+router.post('/cast', protect, authorize('voter', 'user', 'admin'), async (req, res) => {
   try {
     const { electionId, candidateIndex } = req.body;
 
@@ -144,7 +144,7 @@ router.post('/cast', protect, authorize('voter'), async (req, res) => {
 // ═══════════════════════════════════════════
 
 // GET /api/voting/status/:electionId
-router.get('/status/:electionId', protect, authorize('voter'), async (req, res) => {
+router.get('/status/:electionId', protect, authorize('voter', 'user', 'admin'), async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     const hasVoted = user.hasVoted && user.hasVoted.get(req.params.electionId);
@@ -164,7 +164,7 @@ router.get('/status/:electionId', protect, authorize('voter'), async (req, res) 
 // ═══════════════════════════════════════════
 
 // GET /api/voting/eligible-elections
-router.get('/eligible-elections', protect, authorize('voter'), async (req, res) => {
+router.get('/eligible-elections', protect, authorize('voter', 'user', 'admin'), async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     const now = new Date();

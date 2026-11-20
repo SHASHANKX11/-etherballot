@@ -26,6 +26,7 @@
   - [5. Hybrid Architecture: Off-Chain Identity + On-Chain Trust](#5-hybrid-architecture-off-chain-identity--on-chain-trust)
 - [System Architecture](#-system-architecture)
 - [Biometric & Verification Pipeline](#-biometric--verification-pipeline)
+- [Web Application Interface Showcase](#-web-application-interface-showcase)
 - [Technology Stack](#-technology-stack)
 - [Repository Structure](#-repository-structure)
 - [Prerequisites](#-prerequisites)
@@ -292,6 +293,25 @@ sequenceDiagram
         API-->>App: 401 Biometric Verification Failed
     end
 ```
+
+---
+
+## 🖼️ Web Application Interface Showcase
+
+EtherBallot implements a cyber-sovereign dark mode design system built with React 18, Vite, and custom glassmorphism. Below is a structured walkthrough of the 10 core application modules:
+
+| Screen # | Interface Module | Application Route | Key UX & Cryptographic Features |
+|:---:|:---|:---|:---|
+| **01** | **Ecosystem Landing Page** | [`/`](http://localhost:5173/) | Live on-chain metrics, active election counters, smart contract gas tracker (Gwei), and sovereign emblem header |
+| **02** | **Voter Enrollment: Step 1 (Aadhaar)** | [`/register`](http://localhost:5173/register) | 12-digit citizen identification check, 256-bit SHA cryptographic hashing, and demo auto-fill for sandbox testing |
+| **03** | **Voter Enrollment: Step 2 (Constituency)** | [`/register`](http://localhost:5173/register) | Demographic registration form paired with browser GPS constituency jurisdiction detection |
+| **04** | **Email Verification Code Dispatch** | [`/register`](http://localhost:5173/register) & [`/login`](http://localhost:5173/login) | 6-digit verification code input with 5-minute expiry timer dispatched directly from `ehterballotproject@gmail.com` |
+| **05** | **Biometric Facial AI Scanner** | [`/login`](http://localhost:5173/login) & [`/register`](http://localhost:5173/register) | Live camera viewfinder with 128D neural facial vector extraction, Euclidean distance thresholding (<0.50), and liveness check |
+| **06** | **3-Factor Voter Sign-In Portal** | [`/login`](http://localhost:5173/login) | Multi-factor stepper: Aadhaar ID ➔ Email Verification Code ➔ Face AI Biometrics |
+| **07** | **Official Electronic Ballot Casting** | [`/vote`](http://localhost:5173/vote) | Candidate selection grid with political symbols, candidate avatars, and floating Web3 transaction signing bar |
+| **08** | **Cryptographic Ballot Receipt** | [`/vote`](http://localhost:5173/vote) | Permanent on-chain proof featuring block number, timestamp, and 32-byte Keccak-256 vote hash with copy action |
+| **09** | **Live Election Results & Analytics** | [`/results`](http://localhost:5173/results) | Real-time candidate vote share progress bars, hourly turnout charts, demographic breakdowns, and winner declaration |
+| **10** | **Super Admin Security Control Center** | [`/admin`](http://localhost:5173/admin/login) | Executive dashboard with state election commissioner controls, system nodes monitor, and append-only security audit logs |
 
 ---
 

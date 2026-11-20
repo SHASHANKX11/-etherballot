@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useWeb3 } from '../context/Web3Context';
 import { 
   HiOutlineMenu, 
   HiOutlineX, 
@@ -15,6 +16,7 @@ import VoterSearchModal from './VoterSearchModal';
 
 const Navbar = () => {
   const { isAuthenticated, user, role, isAdmin, logout } = useAuth();
+  const { isConnected, account, connectWallet, disconnectWallet } = useWeb3();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
@@ -57,15 +59,21 @@ const Navbar = () => {
     ? isAdmin
       ? [
           { path: '/admin', label: lang === 'hi' ? 'डैशबोर्ड' : 'Dashboard' },
+          { path: '/qr-scanner', label: lang === 'hi' ? 'क्यूआर स्कैनर' : '📷 QR Scanner' },
           { path: '/admin/elections', label: lang === 'hi' ? 'निर्वाचन' : 'Elections' },
           { path: '/admin/voters', label: lang === 'hi' ? 'मतदाता सूची' : 'Electoral Roll' },
           { path: '/results', label: lang === 'hi' ? 'परिणाम व ऑडिट' : 'Results & Audits' },
         ]
       : [
+          { path: '/voter-card', label: lang === 'hi' ? 'मेरा डिजिटल वोटर कार्ड' : 'MY DIGITAL VOTER ID' },
+          { path: '/qr-scanner', label: lang === 'hi' ? 'क्यूआर स्कैनर' : '📷 QR Scanner' },
           { path: '/vote', label: lang === 'hi' ? 'इलेक्ट्रॉनिक मतपत्र' : 'Electronic Ballot' },
+          { path: '/results', label: lang === 'hi' ? 'चुनाव परिणाम' : 'Election Results' },
         ]
     : [
         { path: '/', label: lang === 'hi' ? 'मुख्य पृष्ठ' : 'Home' },
+        { path: '/voter-card', label: lang === 'hi' ? 'डिजिटल वोटर कार्ड' : 'Digital Voter ID' },
+        { path: '/qr-scanner', label: lang === 'hi' ? 'क्यूआर स्कैनर' : '📷 QR Scanner' },
         { path: '/results', label: lang === 'hi' ? 'चुनाव परिणाम' : 'Election Results' },
       ];
 
@@ -89,7 +97,7 @@ const Navbar = () => {
           <div className="gov-top-bar__right">
             {/* Toll-Free National Voter Helpline */}
             <a href="tel:1950" className="gov-helpline-pill" title="National Voter Helpline 1950">
-              <HiOutlinePhone size={13} style={{ color: '#ff9933' }} />
+              <HiOutlinePhone size={13} style={{ color: '#38bdf8' }} />
               <span>Voter Helpline: <strong>1950</strong> (Toll-Free)</span>
             </a>
 
@@ -167,6 +175,33 @@ const Navbar = () => {
 
           {/* Right Action / Auth Buttons */}
           <div className="navbar__right">
+            {/* MetaMask Web3 Status Pill */}
+            <button
+              type="button"
+              onClick={isConnected ? disconnectWallet : connectWallet}
+              className="btn btn-sm"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 8,
+                border: isConnected ? '1.5px solid #10b981' : '1.5px solid #38bdf8',
+                background: isConnected ? 'rgba(16, 185, 129, 0.08)' : 'rgba(56, 189, 248, 0.08)',
+                color: isConnected ? '#059669' : '#0284c7',
+                fontWeight: 600,
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title={isConnected ? `Connected: ${account}. Click to disconnect.` : 'Connect MetaMask Ethereum Wallet'}
+            >
+              <span style={{ fontSize: '1rem', lineHeight: 1 }}>🦊</span>
+              <span className="hide-mobile">
+                {isConnected ? `${account.slice(0, 6)}...${account.slice(-4)}` : 'Connect Wallet'}
+              </span>
+            </button>
+
             {isAuthenticated ? (
               <div className="navbar__user">
                 <div className="navbar__user-info hide-mobile">
@@ -212,6 +247,30 @@ const Navbar = () => {
         {/* Mobile Menu Drawer */}
         {isMobileOpen && (
           <div className="navbar__mobile-menu animate-slide-up">
+            {/* Mobile MetaMask Pill */}
+            <button
+              type="button"
+              onClick={isConnected ? disconnectWallet : connectWallet}
+              className="btn btn-block btn-sm"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '8px 14px',
+                borderRadius: 8,
+                marginBottom: 8,
+                border: isConnected ? '1.5px solid #10b981' : '1.5px solid #38bdf8',
+                background: isConnected ? 'rgba(16, 185, 129, 0.08)' : 'rgba(56, 189, 248, 0.08)',
+                color: isConnected ? '#059669' : '#0284c7',
+                fontWeight: 600,
+                fontSize: '0.85rem',
+              }}
+            >
+              <span>🦊</span>
+              <span>{isConnected ? `Connected (${account.slice(0, 6)}...${account.slice(-4)})` : 'Connect MetaMask Wallet'}</span>
+            </button>
+
             <button 
               className="gov-search-trigger-btn mb-sm"
               style={{ width: '100%', justifyContent: 'center' }}
@@ -249,22 +308,22 @@ const Navbar = () => {
       />
 
       <style>{`
-        /* ─── GIGW Tricolor Ribbon Strip ─── */
+        /* ─── Top Strip (Blue - Light Blue - White - Royal Blue) ─── */
         .gov-tricolor-strip {
           height: 4px;
-          background: linear-gradient(90deg, #ff9933 0%, #ff9933 33.33%, #ffffff 33.33%, #ffffff 66.66%, #138808 66.66%, #138808 100%);
+          background: linear-gradient(90deg, #2563eb 0%, #38bdf8 30%, #ffffff 50%, #38bdf8 70%, #2563eb 100%);
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           z-index: 102;
-          box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
         }
 
-        /* ─── Sovereign Top Bar ─── */
+        /* ─── Sovereign Top Bar (Light Government) ─── */
         .gov-top-bar {
-          background: linear-gradient(90deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%); /* Deep Sovereign Blue */
-          color: #ffffff;
+          background: linear-gradient(90deg, #ffffff 0%, #eef5fc 50%, #ffffff 100%);
+          color: #0f172a;
           font-size: 0.76rem;
           height: 36px;
           position: fixed;
@@ -274,7 +333,7 @@ const Navbar = () => {
           z-index: 101;
           display: flex;
           align-items: center;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+          border-bottom: 1px solid rgba(37, 99, 235, 0.14);
         }
         .gov-top-bar__inner {
           display: flex;
@@ -305,7 +364,7 @@ const Navbar = () => {
         .gov-title-hi {
           font-family: 'Noto Sans Devanagari', sans-serif;
           font-weight: 700;
-          color: #ff9933;
+          color: #0369a1;
         }
         .gov-title-en {
           font-weight: 600;
@@ -313,22 +372,22 @@ const Navbar = () => {
         }
         .gov-auth-tag {
           font-size: 0.68rem;
-          background: rgba(255, 255, 255, 0.15);
+          background: rgba(37, 99, 235, 0.08);
           padding: 1px 6px;
           border-radius: 3px;
-          color: #e2e8f0;
+          color: #334155;
         }
         .gov-divider {
-          color: rgba(255, 255, 255, 0.3);
+          color: rgba(15, 23, 42, 0.3);
         }
         .gov-helpline-pill {
           display: flex;
           align-items: center;
           gap: 6px;
-          color: #ffffff;
+          color: #334155;
           font-size: 0.74rem;
           padding: 2px 8px;
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(37, 99, 235, 0.08);
           border-radius: 4px;
           transition: background 0.2s;
         }
@@ -341,37 +400,37 @@ const Navbar = () => {
         }
         .gov-font-resizer button {
           padding: 1px 6px;
-          background: rgba(255, 255, 255, 0.15);
+          background: rgba(37, 99, 235, 0.08);
           border-radius: 3px;
-          color: #ffffff;
+          color: #334155;
           font-size: 0.7rem;
           font-weight: 700;
           transition: all 0.2s;
         }
         .gov-font-resizer button:hover {
-          background: #ff9933;
-          color: #0f172a;
+          background: #38bdf8;
+          color: #05070f;
         }
         .gov-lang-switcher {
           display: flex;
           align-items: center;
           gap: 4px;
-          color: rgba(255, 255, 255, 0.85);
+          color: #334155;
         }
         .gov-lang-btn {
           background: none;
-          color: #cbd5e1;
+          color: #475569;
           font-size: 0.72rem;
           padding: 0 2px;
           font-weight: 600;
         }
         .gov-lang-btn.active {
-          color: #ff9933;
+          color: #38bdf8;
           font-weight: 800;
           text-decoration: underline;
         }
 
-        /* ─── Main Navbar ─── */
+        /* ─── Main Navbar (Light Sovereign) ─── */
         .navbar {
           position: fixed;
           top: 40px;
@@ -379,18 +438,18 @@ const Navbar = () => {
           right: 0;
           z-index: 100;
           padding: 0 var(--space-md);
-          background: rgba(255, 255, 255, 0.94);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border-bottom: 1.5px solid rgba(226, 232, 240, 0.85);
-          box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+          background: rgba(255, 255, 255, 0.92);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(37, 99, 235, 0.14);
+          box-shadow: 0 4px 25px rgba(15, 23, 42, 0.10);
           transition: all var(--transition-normal);
         }
         .navbar--scrolled {
           top: 0;
-          background: rgba(255, 255, 255, 0.97);
-          box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08), 0 0 15px rgba(37, 99, 235, 0.05);
-          border-bottom-color: rgba(30, 58, 138, 0.3);
+          background: rgba(255, 255, 255, 0.98);
+          box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12), 0 0 20px rgba(56, 189, 248, 0.10);
+          border-bottom-color: rgba(56, 189, 248, 0.35);
         }
         .navbar__inner {
           max-width: 1240px;
@@ -428,16 +487,16 @@ const Navbar = () => {
           font-family: var(--font-heading);
           font-size: 0.78rem;
           font-weight: 800;
-          color: #1e3a8a;
+          color: #0369a1;
           letter-spacing: 0.04em;
         }
         .navbar__gov-sub {
           font-size: 0.7rem;
-          color: #64748b;
+          color: #94a3b8;
           margin-top: 1px;
         }
         .navbar__gov-sub strong {
-          color: #2563eb;
+          color: #38bdf8;
         }
         
         .gov-search-trigger-btn {
@@ -445,20 +504,21 @@ const Navbar = () => {
           align-items: center;
           gap: 8px;
           padding: 8px 16px;
-          background: #f8fafc;
-          border: 1px solid var(--border-primary);
+          background: rgba(255, 255, 255, 0.96);
+          border: 1px solid rgba(56, 189, 248, 0.25);
           border-radius: var(--radius-full);
           font-size: 0.84rem;
           color: #334155;
           font-weight: 600;
           transition: all 0.25s ease;
           cursor: pointer;
+          backdrop-filter: blur(8px);
         }
         .gov-search-trigger-btn:hover {
-          background: #ffffff;
-          border-color: #2563eb;
-          color: #1d4ed8;
-          box-shadow: 0 4px 14px rgba(37, 99, 235, 0.18), 0 0 0 2px rgba(37, 99, 235, 0.1);
+          background: rgba(224, 242, 254, 0.95);
+          border-color: #38bdf8;
+          color: #0f172a;
+          box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
           transform: translateY(-1px);
         }
 
@@ -477,15 +537,16 @@ const Navbar = () => {
           position: relative;
         }
         .navbar__link:hover {
-          color: #1e3a8a;
-          background: rgba(37, 99, 235, 0.05);
+          color: #0f172a;
+          background: rgba(56, 189, 248, 0.1);
           transform: translateY(-1px);
         }
         .navbar__link--active {
-          color: #1d4ed8;
-          background: rgba(37, 99, 235, 0.08);
-          border-bottom: 2px solid #2563eb;
+          color: #38bdf8;
+          background: rgba(56, 189, 248, 0.15);
+          border-bottom: 2px solid #38bdf8;
           font-weight: 700;
+          box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
         }
 
         .navbar__right {
@@ -511,7 +572,7 @@ const Navbar = () => {
         }
         .navbar__user-role {
           font-size: 0.72rem;
-          color: #2563eb;
+          color: #38bdf8;
           font-weight: 600;
         }
         .navbar__auth-buttons {
@@ -531,13 +592,14 @@ const Navbar = () => {
           top: 74px;
           left: 0;
           right: 0;
-          background: #ffffff;
-          border-bottom: 2px solid #1e3a8a;
+          background: rgba(255, 255, 255, 0.98);
+          border-bottom: 2px solid #38bdf8;
           padding: var(--space-lg);
           display: flex;
           flex-direction: column;
           gap: 8px;
-          box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+          box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+          backdrop-filter: blur(20px);
         }
         .navbar__mobile-link {
           padding: 12px 16px;
@@ -548,8 +610,8 @@ const Navbar = () => {
         }
         .navbar__mobile-link:hover,
         .navbar__mobile-link--active {
-          background: #f1f5f9;
-          color: #1d4ed8;
+          background: rgba(56, 189, 248, 0.15);
+          color: #38bdf8;
           font-weight: 700;
         }
         .navbar__mobile-auth-group {

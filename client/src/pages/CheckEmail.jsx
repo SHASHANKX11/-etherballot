@@ -66,14 +66,14 @@ const CheckEmail = () => {
         <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', marginBottom: 'var(--space-lg)', lineHeight: 1.6 }}>
           We&apos;ve sent an official verification link to:
           <br />
-          <strong style={{ color: '#2563eb', fontSize: '1.1rem' }}>{email || 'your registered email'}</strong>
+          <strong style={{ color: '#38bdf8', fontSize: '1.1rem' }}>{email || 'your registered email'}</strong>
         </p>
 
-        <div style={{ background: '#f8fafc', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-secondary)', textAlign: 'left', marginBottom: 'var(--space-xl)' }}>
-          <div className="flex items-center gap-sm mb-xs" style={{ color: '#0f172a', fontWeight: 700, fontSize: '0.92rem' }}>
-            <HiOutlineClock style={{ color: '#d97706' }} /> Verification Notice
+        <div style={{ background: 'rgba(5, 7, 15, 0.75)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(56, 189, 248, 0.25)', textAlign: 'left', marginBottom: 'var(--space-xl)' }}>
+          <div className="flex items-center gap-sm mb-xs" style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.92rem' }}>
+            <HiOutlineClock style={{ color: '#38bdf8' }} /> Verification Notice
           </div>
-          <ul style={{ margin: 0, paddingLeft: 20, fontSize: '0.88rem', color: '#475569', lineHeight: 1.6 }}>
+          <ul style={{ margin: 0, paddingLeft: 20, fontSize: '0.88rem', color: '#cbd5e1', lineHeight: 1.6 }}>
             <li>The secure link will expire in <strong>30 minutes</strong>.</li>
             <li>Click <strong>Verify Email Address</strong> inside the email to activate full ballot access.</li>
             <li>Check your Spam or Junk folder if you do not see it within a couple minutes.</li>

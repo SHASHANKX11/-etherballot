@@ -20,7 +20,7 @@ const FaceCapture = ({ onCapture, onError, mode = 'register' }) => {
   const [captureReady, setCaptureReady] = useState(false);
   const [blinkCount, setBlinkCount] = useState(0);
   const [statusMsg, setStatusMsg] = useState('Position your face inside the scanner frame');
-  const [eyeHistory, setEyeHistory] = useState([]);
+  const [, setEyeHistory] = useState([]);
   const [isProcessingCapture, setIsProcessingCapture] = useState(false);
 
   // Load face-api models

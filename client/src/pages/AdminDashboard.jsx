@@ -11,15 +11,17 @@ import {
   HiOutlinePlus, 
   HiOutlineRefresh,
   HiOutlineTrash,
-  HiOutlineCheckCircle,
-  HiOutlineExclamation
+  HiOutlineExclamation,
+  HiOutlineIdentification,
+  HiOutlineQrcode
 } from 'react-icons/hi';
+import AdminVoterIDManager from '../components/AdminVoterIDManager';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-const COLORS = ['#2563eb', '#0284c7', '#059669', '#d97706', '#7c3aed', '#ec4899', '#4f46e5', '#f97316'];
+const COLORS = ['#2563eb', '#38bdf8', '#1d4ed8', '#7dd3fc', '#0284c7', '#60a5fa', '#93c5fd', '#1e40af'];
 
 const AdminDashboard = ({ tab: initialTab }) => {
-  const { user, isSuperAdmin, isStateAdmin, isDistrictAdmin } = useAuth();
+  const { user, isSuperAdmin, isStateAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState(initialTab || 'overview');
   const [stats, setStats] = useState(null);
   const [elections, setElections] = useState([]);
@@ -93,7 +95,7 @@ const AdminDashboard = ({ tab: initialTab }) => {
 
   // ═══ CREATE ELECTION ═══
   const handleCreateElection = async () => {
-    const { name, description, type, startDate, endDate, candidates } = electionForm;
+    const { name, description, startDate, endDate, candidates } = electionForm;
     if (!name || !description || !startDate || !endDate) {
       toast.error('Please fill all required fields');
       return;
@@ -196,8 +198,9 @@ const AdminDashboard = ({ tab: initialTab }) => {
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: <HiOutlineChartBar size={18} /> },
+    { id: 'voter_cards', label: 'Voter ID & QR Cards', icon: <HiOutlineIdentification size={18} /> },
     { id: 'elections', label: 'Elections', icon: <HiOutlineClipboardList size={18} /> },
-    { id: 'voters', label: 'Voters', icon: <HiOutlineUserGroup size={18} /> },
+    { id: 'voters', label: 'Voters Roll', icon: <HiOutlineUserGroup size={18} /> },
     ...(isSuperAdmin || isStateAdmin ? [{ id: 'admins', label: 'Administrators', icon: <HiOutlineShieldCheck size={18} /> }] : []),
     ...(isSuperAdmin || isStateAdmin ? [{ id: 'logs', label: 'Audit Trail' }] : [])
   ];
@@ -207,7 +210,7 @@ const AdminDashboard = ({ tab: initialTab }) => {
       <div className="page-header" style={{ marginTop: 'var(--space-md)', textAlign: 'left' }}>
         <div className="flex justify-between items-center flex-wrap gap-md">
           <div>
-            <div className="badge badge--warning mb-xs">
+            <div className="badge badge--primary mb-xs">
               <HiOutlineShieldCheck />
               {isSuperAdmin ? 'National Oversight' : isStateAdmin ? 'State Jurisdiction' : 'District Jurisdiction'}
             </div>
@@ -284,7 +287,7 @@ const AdminDashboard = ({ tab: initialTab }) => {
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(15, 23, 42, 0.08)" />
                         <XAxis dataKey="name" tick={{ fill: '#475569', fontSize: 10, fontWeight: 600 }} angle={-35} textAnchor="end" height={60} />
                         <YAxis tick={{ fill: '#475569', fontSize: 12 }} />
-                        <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid rgba(37, 99, 235, 0.25)', borderRadius: 8, color: '#0f172a', boxShadow: '0 4px 16px rgba(15,23,42,0.1)' }} />
+                        <Tooltip contentStyle={{ background: 'rgba(5, 7, 15, 0.95)', border: '1px solid rgba(56, 189, 248, 0.4)', borderRadius: 8, color: '#ffffff', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }} />
                         <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
@@ -310,7 +313,7 @@ const AdminDashboard = ({ tab: initialTab }) => {
                             <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip contentStyle={{ background: '#ffffff', border: '1px solid rgba(37, 99, 235, 0.25)', borderRadius: 8, color: '#0f172a', boxShadow: '0 4px 16px rgba(15,23,42,0.1)' }} />
+                        <Tooltip contentStyle={{ background: 'rgba(5, 7, 15, 0.95)', border: '1px solid rgba(56, 189, 248, 0.4)', borderRadius: 8, color: '#ffffff', boxShadow: '0 4px 16px rgba(0,0,0,0.6)' }} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -547,6 +550,13 @@ const AdminDashboard = ({ tab: initialTab }) => {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* ═══ VOTER CARDS & QR MANAGEMENT TAB ═══ */}
+          {activeTab === 'voter_cards' && (
+            <div className="animate-fade-in">
+              <AdminVoterIDManager />
             </div>
           )}
 

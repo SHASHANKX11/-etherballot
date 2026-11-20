@@ -10,7 +10,7 @@
     "build": "cd client && npm run build",
     "admin:seed": "cd server && node seed-admin.js",
     "start:server": "cd server && npm start",
-    "lint": "cd client && npx eslint src --ext .js,.jsx"
+    "lint": "cd client && npm run lint"
   },
   "dependencies": {
     "concurrently": "^9.1.0"
@@ -32,11 +32,16 @@
     "serve-static": "^1.16.2",
     "express": "^4.21.2",
     "axios": "^1.7.9",
-    "vite": "^5.4.14",
+    "vite": "^5.4.21",
     "qs": "^6.16.0",
     "node-fetch": "^2.6.7",
     "esbuild": "^0.25.0",
     "chokidar": "^3.6.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "word-wrap": "^1.2.5",
+    "semver": "^7.6.3",
+    "ansi-regex": "^5.0.1",
+    "strip-ansi": "^6.0.1",
+    "doctrine": "^3.0.0"
   }
 }

@@ -16,6 +16,8 @@ const Results        = lazy(() => import('./pages/Results'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const CheckEmail     = lazy(() => import('./pages/CheckEmail'));
 const VerifyEmail    = lazy(() => import('./pages/VerifyEmail'));
+const MyDigitalVoterID = lazy(() => import('./pages/MyDigitalVoterID'));
+const QRScannerPage    = lazy(() => import('./pages/QRScannerPage'));
 
 const RouteLoader = () => (
   <div className="page-container text-center" style={{ paddingTop: '20vh' }}>
@@ -37,12 +39,15 @@ function App() {
             <Route path="/login"       element={<Login />} />
             <Route path="/check-email" element={<CheckEmail />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/voter-card" element={<MyDigitalVoterID />} />
+            <Route path="/digital-id" element={<MyDigitalVoterID />} />
+            <Route path="/qr-scanner" element={<QRScannerPage />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/results"     element={<Results />} />
 
             {/* Protected Voter Routes */}
             <Route path="/vote" element={
-              <ProtectedRoute roles={['voter']}>
+              <ProtectedRoute roles={['voter', 'user']}>
                 <Voting />
               </ProtectedRoute>
             } />
@@ -168,20 +173,20 @@ function App() {
 
         <style>{`
           .gov-footer {
-            background: #0f172a;
-            color: #ffffff;
+            background: #eef4fb;
+            color: #0f172a;
             margin-top: auto;
             position: relative;
             z-index: 1;
           }
           .gov-footer-tricolor {
             height: 4px;
-            background: linear-gradient(90deg, #ff9933 0%, #ff9933 33.33%, #ffffff 33.33%, #ffffff 66.66%, #138808 66.66%, #138808 100%);
+            background: linear-gradient(90deg, #2563eb 0%, #38bdf8 35%, #ffffff 65%, #1d4ed8 100%);
           }
           .gov-footer-links-bar {
-            background: #1e293b;
+            background: rgba(255, 255, 255, 0.92);
             padding: var(--space-2xl) 0 var(--space-xl);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(37, 99, 235, 0.12);
           }
           .gov-footer-links-grid {
             display: grid;
@@ -191,12 +196,12 @@ function App() {
           .gov-footer-heading {
             font-size: 0.92rem;
             font-weight: 800;
-            color: #ffffff;
+            color: #0f172a;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: var(--space-md);
             padding-bottom: 6px;
-            border-bottom: 2px solid #2563eb;
+            border-bottom: 2px solid #38bdf8;
             display: inline-block;
           }
           .gov-footer-list {
@@ -205,7 +210,7 @@ function App() {
             gap: 8px;
           }
           .gov-footer-list a {
-            color: #cbd5e1;
+            color: #475569;
             font-size: 0.84rem;
             transition: color 0.2s;
             display: flex;
@@ -213,18 +218,18 @@ function App() {
             gap: 4px;
           }
           .gov-footer-list a:hover {
-            color: #ff9933;
+            color: #38bdf8;
             text-decoration: underline;
           }
           .gov-footer-contact-item {
             display: flex;
             gap: 8px;
             font-size: 0.84rem;
-            color: #cbd5e1;
+            color: #475569;
           }
           .gov-footer-bottom {
             padding: var(--space-xl) 0 var(--space-lg);
-            background: #0f172a;
+            background: #eef4fb;
           }
           .gov-footer-bottom__inner {
             display: flex;
@@ -232,17 +237,17 @@ function App() {
             align-items: center;
             gap: var(--space-lg);
             padding-bottom: var(--space-lg);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(37, 99, 235, 0.12);
           }
           .gov-footer-title {
             font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
             font-weight: 800;
             font-size: 0.95rem;
-            color: #ffffff;
+            color: #0f172a;
           }
           .gov-footer-sub {
             font-size: 0.76rem;
-            color: #94a3b8;
+            color: #64748b;
           }
           .gov-footer-compliance {
             display: flex;
@@ -250,17 +255,17 @@ function App() {
             flex-wrap: wrap;
           }
           .gov-compliance-badge {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(37, 99, 235, 0.16);
             padding: 3px 8px;
             border-radius: 4px;
             font-size: 0.7rem;
-            color: #e2e8f0;
+            color: #334155;
             font-weight: 600;
             transition: background 0.2s;
           }
           .gov-compliance-badge:hover {
-            background: rgba(255, 255, 255, 0.14);
+            background: rgba(56, 189, 248, 0.10);
           }
           .gov-footer-meta-row {
             display: flex;
@@ -268,7 +273,7 @@ function App() {
             align-items: center;
             padding-top: var(--space-md);
             font-size: 0.76rem;
-            color: #94a3b8;
+            color: #64748b;
           }
 
           @media (max-width: 900px) {

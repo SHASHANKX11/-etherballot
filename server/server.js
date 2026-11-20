@@ -17,6 +17,7 @@ const adminRoutes = require('./routes/admin');
 const electionRoutes = require('./routes/election');
 const votingRoutes = require('./routes/voting');
 const voterRoutes = require('./routes/voter');
+const voterCardRoutes = require('./routes/voterCard');
 
 // Import models for seeding
 const Admin = require('./models/Admin');
@@ -141,7 +142,7 @@ app.use('/api/', limiter);
 // Stricter rate limit for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 15,
+  max: NODE_ENV === 'development' ? 1000 : 15,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many authentication attempts.' }
@@ -177,6 +178,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/elections', electionRoutes);
 app.use('/api/voting', votingRoutes);
 app.use('/api/voters', voterRoutes);
+app.use('/api/voter-card', voterCardRoutes);
 
 // Health check (no sensitive info exposed)
 app.get('/api/health', (req, res) => {

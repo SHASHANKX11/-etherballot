@@ -42,7 +42,15 @@ const userSchema = new mongoose.Schema({
     state: { type: String, required: true },
     district: { type: String, required: true },
     pincode: { type: String },
-    addressLine: { type: String }
+    addressLine: { type: String },
+    constituency: { type: String }
+  },
+  location: {
+    latitude: { type: Number, default: null },
+    longitude: { type: Number, default: null },
+    constituency: { type: String, default: null },
+    pollingStation: { type: String, default: null },
+    detectedAt: { type: Date, default: null }
   },
   faceDescriptor: {
     type: [Number],  // 128-dimensional face descriptor array from face-api.js
@@ -76,10 +84,85 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  // role: 'user' = standard voter, 'admin' = admin voter, 'voter' kept for backward compat
   role: {
     type: String,
-    enum: ['voter'],
-    default: 'voter'
+    enum: ['voter', 'user', 'admin'],
+    default: 'user'
+  },
+
+  // --- Voter ID (assigned after email verify) ---
+  voterId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+
+  // --- Voter Registration ID (e.g. EBV2025110001) ---
+  voterRegId: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+
+  // --- Approval & Status ---
+  approvalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'approved'
+  },
+  checkInStatus: {
+    type: String,
+    enum: ['not_checked_in', 'checked_in'],
+    default: 'not_checked_in'
+  },
+  checkedInAt: {
+    type: Date,
+    default: null
+  },
+  checkedInStation: {
+    type: String,
+    default: null
+  },
+
+  // --- Polling Station & Constituency Details ---
+  assignedPollingStation: {
+    type: String,
+    default: 'Government High School, Bangalore'
+  },
+  pollingStationAddress: {
+    type: String,
+    default: 'Bangalore Central, Karnataka'
+  },
+  constituency: {
+    type: String,
+    default: 'Karnataka - Bangalore Central'
+  },
+
+  // --- QR token (single-use signed token for QR login & polling check-in) ---
+  qrToken: {
+    type: String,
+    default: null
+  },
+  qrTokenExpiry: {
+    type: Date,
+    default: null
+  },
+  qrTokenUsed: {
+    type: Boolean,
+    default: false
+  },
+  qrTokenRevoked: {
+    type: Boolean,
+    default: false
+  },
+  totalScans: {
+    type: Number,
+    default: 0
+  },
+  lastScannedAt: {
+    type: Date,
+    default: null
   },
   loginAttempts: {
     type: Number,
@@ -93,11 +176,28 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for fast lookups
-// Note: aadhaarNumber index is already created by unique: true on the field
+// Indexes
 userSchema.index({ mobile: 1 });
 userSchema.index({ email: 1 });
+userSchema.index({ voterId: 1 });
 userSchema.index({ 'address.state': 1, 'address.district': 1 });
+
+// Generate sequential voter ID: EB-YYYY-NNNNNN
+userSchema.statics.generateVoterId = async function() {
+  const year = new Date().getFullYear();
+  const prefix = `EB-${year}-`;
+  const count = await this.countDocuments({ voterId: { $regex: `^${prefix}` } });
+  const seq = String(count + 1).padStart(6, '0');
+  return `${prefix}${seq}`;
+};
+
+// Generate Voter Registration ID: EBV{YEAR}{SEQUENCE}
+userSchema.statics.generateVoterRegId = async function() {
+  const year = new Date().getFullYear();
+  const count = await this.countDocuments();
+  const seq = String(count + 1).padStart(6, '0');
+  return `EBV${year}${seq}`;
+};
 
 // Check if account is locked
 userSchema.methods.isLocked = function() {

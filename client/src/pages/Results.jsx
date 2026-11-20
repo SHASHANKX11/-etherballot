@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { electionAPI, votingAPI } from '../services/api';
+import web3Service from '../services/web3Service';
 import toast from 'react-hot-toast';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { 
   HiOutlineChartBar, 
-  HiOutlineShieldCheck, 
   HiOutlineSearch, 
   HiOutlineArrowLeft,
   HiOutlineSparkles,
@@ -12,7 +12,7 @@ import {
   HiOutlineXCircle
 } from 'react-icons/hi';
 
-const COLORS = ['#2563eb', '#0284c7', '#059669', '#d97706', '#7c3aed', '#ec4899', '#4f46e5', '#f97316'];
+const COLORS = ['#2563eb', '#38bdf8', '#1d4ed8', '#7dd3fc', '#0284c7', '#60a5fa', '#93c5fd', '#1e40af'];
 
 const Results = () => {
   const [elections, setElections] = useState([]);
@@ -31,7 +31,7 @@ const Results = () => {
     try {
       const res = await electionAPI.getAll();
       setElections(res.data.elections);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load elections');
     }
     setLoading(false);
@@ -42,7 +42,7 @@ const Results = () => {
     try {
       const res = await electionAPI.getResults(election._id);
       setResults(res.data.election);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load results');
     }
   };
@@ -54,10 +54,30 @@ const Results = () => {
     }
     setVerifying(true);
     try {
-      const res = await votingAPI.verifyVote(verifyHash);
+      const res = await votingAPI.verifyVote(verifyHash.trim());
       setVerifyResult(res.data);
       toast.success('Vote verified on ledger!');
-    } catch (err) {
+    } catch {
+      if (verifyHash.trim().startsWith('0x') && verifyHash.trim().length === 66) {
+        try {
+          const provider = web3Service.getReadOnlyProvider();
+          const tx = await provider.getTransaction(verifyHash.trim());
+          if (tx) {
+            setVerifyResult({
+              verified: true,
+              timestamp: new Date().toISOString(),
+              blockNumber: tx.blockNumber,
+              from: tx.from,
+              onChain: true
+            });
+            toast.success('Found matching Ethereum transaction on ledger!');
+            setVerifying(false);
+            return;
+          }
+        } catch (chainErr) {
+          console.debug('On-chain query:', chainErr);
+        }
+      }
       setVerifyResult({ verified: false });
       toast.error('Vote hash not found on smart contract ledger');
     }
@@ -81,15 +101,15 @@ const Results = () => {
       const pct = totalVotes > 0 ? ((data.votes / totalVotes) * 100).toFixed(1) : 0;
       return (
         <div style={{
-          background: '#ffffff',
-          border: '1px solid rgba(37, 99, 235, 0.25)',
+          background: 'rgba(5, 7, 15, 0.96)',
+          border: '1px solid rgba(56, 189, 248, 0.45)',
           borderRadius: 'var(--radius-md)',
           padding: '12px 16px',
-          boxShadow: '0 8px 30px rgba(15, 23, 42, 0.12)',
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.75)',
         }}>
-          <p style={{ fontWeight: 800, color: '#0f172a', marginBottom: 2 }}>{data.name}</p>
-          <p style={{ fontSize: '0.85rem', color: '#2563eb', fontWeight: 600 }}>{data.party}</p>
-          <p style={{ fontFamily: 'var(--font-mono)', color: '#059669', marginTop: 4, fontSize: '0.9rem', fontWeight: 700 }}>
+          <p style={{ fontWeight: 800, color: '#ffffff', marginBottom: 2 }}>{data.name}</p>
+          <p style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 600 }}>{data.party}</p>
+          <p style={{ fontFamily: 'var(--font-mono)', color: '#7dd3fc', marginTop: 4, fontSize: '0.9rem', fontWeight: 700 }}>
             {data.votes} votes ({pct}%)
           </p>
         </div>
@@ -263,19 +283,19 @@ const Results = () => {
           {/* Winner Banner */}
           {winner && winner.votes > 0 && results?.status === 'completed' && (
             <div className="glass-card mb-lg animate-scale-in border-gradient-glow" style={{
-              background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, #ffffff 100%)',
-              borderColor: 'rgba(217, 119, 6, 0.35)',
+              background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.25) 0%, rgba(5, 7, 15, 0.95) 100%)',
+              borderColor: 'rgba(56, 189, 248, 0.45)',
               textAlign: 'center',
               padding: 'var(--space-2xl)'
             }}>
-              <div className="badge badge--warning shimmer-badge mb-sm">
+              <div className="badge badge--primary shimmer-badge mb-sm">
                 <HiOutlineSparkles /> ELECTED CANDIDATE
               </div>
-              <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', marginBottom: 4 }}>
+              <h3 style={{ fontSize: '2rem', fontWeight: 900, color: '#ffffff', marginBottom: 4 }}>
                 {winner.name}
               </h3>
-              <p style={{ color: '#b45309', fontSize: '1.05rem', fontWeight: 700 }}>{winner.party}</p>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1.35rem', color: 'var(--accent-success)', marginTop: 'var(--space-md)', fontWeight: 700 }}>
+              <p style={{ color: '#38bdf8', fontSize: '1.05rem', fontWeight: 700 }}>{winner.party}</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '1.35rem', color: '#7dd3fc', marginTop: 'var(--space-md)', fontWeight: 700 }}>
                 {winner.votes} votes ({totalVotes > 0 ? ((winner.votes / totalVotes) * 100).toFixed(1) : 0}% of total vote)
               </p>
             </div>
@@ -317,16 +337,16 @@ const Results = () => {
                   <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div className="flex justify-between items-center">
                       <div>
-                        <span style={{ fontWeight: 700, fontSize: '0.98rem', color: '#0f172a' }}>{candidate.name}</span>
+                        <span style={{ fontWeight: 700, fontSize: '0.98rem', color: 'var(--text-primary)' }}>{candidate.name}</span>
                         <span style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', marginLeft: 8 }}>
                           ({candidate.party})
                         </span>
                       </div>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: '#2563eb', fontWeight: 700 }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.9rem', color: '#38bdf8', fontWeight: 700 }}>
                         {candidate.votes} votes ({pct.toFixed(1)}%)
                       </span>
                     </div>
-                    <div style={{ width: '100%', height: 10, background: '#e2e8f0', borderRadius: varRadiusFull, overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: 10, background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(56, 189, 248, 0.15)', borderRadius: varRadiusFull, overflow: 'hidden' }}>
                       <div
                         style={{
                           height: '100%',

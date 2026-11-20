@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useWeb3 } from '../context/Web3Context';
 import { votingAPI, authAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
@@ -15,11 +16,13 @@ import {
 
 const Voting = () => {
   const { user } = useAuth();
+  const { isConnected, account, connectWallet, castVoteOnChain } = useWeb3();
   const [elections, setElections] = useState([]);
   const [selectedElection, setSelectedElection] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
+  const [metamaskVoting, setMetamaskVoting] = useState(false);
   const [voteReceipt, setVoteReceipt] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -80,6 +83,33 @@ const Voting = () => {
     setShowConfirm(false);
   };
 
+  const handleVoteWithMetaMask = async () => {
+    if (selectedCandidate === null || !selectedElection) return;
+    if (!isConnected) {
+      const connected = await connectWallet();
+      if (!connected) return;
+    }
+    setMetamaskVoting(true);
+    try {
+      toast.loading('Submitting transaction to MetaMask...', { id: 'meta-tx' });
+      const onChainRes = await castVoteOnChain(selectedElection._id, selectedCandidate, user?.aadhaarNumber || user?.aadhaar);
+      toast.success('Ethereum block mined & verified!', { id: 'meta-tx' });
+      
+      const res = await votingAPI.castVote(selectedElection._id, selectedCandidate);
+      setVoteReceipt({
+        ...res.data.receipt,
+        voteHash: onChainRes.transactionHash || res.data.receipt?.voteHash,
+        blockNumber: onChainRes.blockNumber,
+      });
+      setShowConfirm(false);
+    } catch (err) {
+      console.error('MetaMask vote error:', err);
+      toast.error(err.reason || err.message || 'MetaMask transaction rejected or failed', { id: 'meta-tx' });
+    } finally {
+      setMetamaskVoting(false);
+    }
+  };
+
   const handleCopyHash = () => {
     if (!voteReceipt?.voteHash) return;
     navigator.clipboard.writeText(voteReceipt.voteHash);
@@ -115,12 +145,12 @@ const Voting = () => {
             Your encrypted vote has been validated and permanently written to the smart contract ledger.
           </p>
           
-          <div style={{ textAlign: 'left', marginBottom: 'var(--space-xl)', background: '#f8fafc', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-secondary)' }}>
-            <div className="flex justify-between items-center" style={{ padding: '8px 0', borderBottom: '1px solid var(--border-secondary)' }}>
+          <div style={{ textAlign: 'left', marginBottom: 'var(--space-xl)', background: 'rgba(5, 7, 15, 0.75)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
+            <div className="flex justify-between items-center" style={{ padding: '8px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.86rem' }}>Election</span>
-              <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#0f172a' }}>{voteReceipt.electionName}</span>
+              <span style={{ fontWeight: 700, fontSize: '0.92rem', color: '#ffffff' }}>{voteReceipt.electionName}</span>
             </div>
-            <div className="flex justify-between items-center" style={{ padding: '8px 0', borderBottom: '1px solid var(--border-secondary)' }}>
+            <div className="flex justify-between items-center" style={{ padding: '8px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
               <span style={{ color: 'var(--text-muted)', fontSize: '0.86rem' }}>Consensus Status</span>
               <span className="badge badge--success shimmer-badge">Confirmed</span>
             </div>
@@ -145,7 +175,7 @@ const Voting = () => {
                 <HiOutlineClipboardCopy /> {copied ? 'Copied!' : 'Copy Hash'}
               </button>
             </div>
-            <div className="vote-hash" style={{ wordBreak: 'break-all', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', padding: 12, borderRadius: 8, background: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1' }}>
+            <div className="vote-hash" style={{ wordBreak: 'break-all', fontFamily: 'var(--font-mono)', fontSize: '0.82rem', padding: 12, borderRadius: 8, background: '#05070f', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.4)' }}>
               {voteReceipt.voteHash}
             </div>
           </div>
@@ -309,7 +339,7 @@ const Voting = () => {
                 <h4 className="candidate-name">{candidate.name}</h4>
                 <p className="candidate-party">{candidate.party}</p>
                 
-                <div className="mt-md" style={{ fontSize: '0.8rem', color: selectedCandidate === idx ? '#2563eb' : 'var(--text-muted)', fontWeight: selectedCandidate === idx ? 700 : 500 }}>
+                <div className="mt-md" style={{ fontSize: '0.8rem', color: selectedCandidate === idx ? '#38bdf8' : 'var(--text-muted)', fontWeight: selectedCandidate === idx ? 700 : 500 }}>
                   {selectedCandidate === idx ? '● Selected Choice' : 'Click to select'}
                 </div>
               </div>
@@ -317,28 +347,30 @@ const Voting = () => {
           </div>
 
           {selectedCandidate !== null && (
-            <div className="text-center mt-2xl animate-scale-in">
+            <div className="voting-action-bar animate-slide-up">
+              <div className="voting-action-bar__info">
+                <span className="voting-action-bar__label">Selected:</span>
+                <span className="voting-action-bar__name">
+                  {selectedElection.candidates[selectedCandidate]?.name}
+                </span>
+                <span className="voting-action-bar__party">
+                  ({selectedElection.candidates[selectedCandidate]?.party})
+                </span>
+              </div>
               {user && user.emailVerified === false ? (
-                <div style={{ maxWidth: 500, margin: '0 auto' }}>
-                  <button
-                    className="btn btn-secondary btn-lg"
-                    onClick={() => toast.error('Please verify your email address to cast your ballot.')}
-                    disabled
-                    style={{ padding: '16px 40px', fontSize: '1.05rem', opacity: 0.7, cursor: 'not-allowed' }}
-                  >
-                    🔒 Verify Email to Unlock Ballot Casting
-                  </button>
-                  <p style={{ fontSize: '0.82rem', color: '#dc2626', marginTop: 8, fontWeight: 600 }}>
-                    Official policy mandates verified citizen email before smart contract vote authorization.
-                  </p>
-                </div>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => toast.error('Please verify your email address to cast your ballot.')}
+                >
+                  🔒 Verify Email to Unlock
+                </button>
               ) : (
                 <button
-                  className="btn btn-success btn-lg"
+                  className="btn btn-primary btn-md pulse-glow"
                   onClick={() => setShowConfirm(true)}
-                  style={{ padding: '16px 40px', fontSize: '1.1rem', fontWeight: 800 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800 }}
                 >
-                  🗳️ Review & Submit Vote for {selectedElection.candidates[selectedCandidate]?.name}
+                  <span>⚡ Cast Ballot & Sign Transaction</span>
                 </button>
               )}
             </div>
@@ -356,26 +388,38 @@ const Voting = () => {
             <h3 className="modal-title">Confirm Ballot Submission</h3>
             
             <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-lg)', fontSize: '0.95rem', lineHeight: 1.6 }}>
-              You are about to cast your vote for <strong style={{ color: '#2563eb' }}>
+              You are about to cast your vote for <strong style={{ color: '#38bdf8' }}>
                 {selectedElection.candidates[selectedCandidate]?.name}
               </strong> ({selectedElection.candidates[selectedCandidate]?.party}) in{' '}
-              <strong style={{ color: '#0f172a' }}>{selectedElection.name}</strong>.
+              <strong style={{ color: 'var(--text-primary)' }}>{selectedElection.name}</strong>.
             </p>
 
             <div style={{ background: 'rgba(220, 38, 38, 0.08)', border: '1px solid rgba(220, 38, 38, 0.25)', padding: '12px', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--space-xl)', fontSize: '0.84rem', color: '#b91c1c', fontWeight: 500 }}>
               ⚠️ Once submitted, your vote is immutably sealed on the blockchain and cannot be retracted or altered.
             </div>
 
-            <div className="flex gap-md">
-              <button className="btn btn-ghost btn-block" onClick={() => setShowConfirm(false)} disabled={voting}>
-                Cancel
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <button
-                className="btn btn-success btn-block"
+                className="btn btn-primary btn-block"
                 onClick={handleVote}
-                disabled={voting}
+                disabled={voting || metamaskVoting}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
               >
-                {voting ? '⏳ Sealing on Ledger...' : '✓ Confirm & Broadcast Vote'}
+                {voting ? '⏳ Sealing on Ledger...' : '⚡ Instant Cryptographic Relayer'}
+              </button>
+              
+              <button
+                className="btn btn-secondary btn-block"
+                onClick={handleVoteWithMetaMask}
+                disabled={voting || metamaskVoting}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, borderColor: '#f97316', color: '#c2410c' }}
+              >
+                <span>🦊</span>
+                {metamaskVoting ? '⏳ MetaMask Confirmation...' : isConnected ? `Sign via MetaMask (${account.slice(0, 6)}...)` : 'Connect & Sign with MetaMask'}
+              </button>
+
+              <button className="btn btn-ghost btn-block" onClick={() => setShowConfirm(false)} disabled={voting || metamaskVoting}>
+                Cancel
               </button>
             </div>
           </div>

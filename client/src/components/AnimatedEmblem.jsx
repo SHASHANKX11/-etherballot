@@ -60,7 +60,7 @@ const AnimatedEmblem = ({ size = 48, showText = false, titleHindi = "भार�
           position: absolute;
           inset: -4px;
           border-radius: 12px;
-          background: radial-gradient(circle, rgba(217, 119, 6, 0.18) 0%, rgba(37, 99, 235, 0.15) 60%, transparent 85%);
+          background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, rgba(37, 99, 235, 0.2) 60%, transparent 85%);
           filter: blur(6px);
           opacity: 0.6;
           animation: auraPulse 4s ease-in-out infinite alternate;

@@ -128,13 +128,13 @@ const VerifyEmail = () => {
         {verificationState === 'success' && (
           <div className="animate-scale-in">
             <div 
-              className="feature-card__icon stat-card__icon--success" 
-              style={{ width: 68, height: 68, margin: '0 auto var(--space-md)', color: '#059669', fontSize: '2.2rem' }}
+              className="feature-card__icon stat-card__icon--primary" 
+              style={{ width: 68, height: 68, margin: '0 auto var(--space-md)', color: '#38bdf8', fontSize: '2.2rem' }}
             >
               <HiOutlineCheckCircle size={44} />
             </div>
 
-            <div className="badge badge--success shimmer-badge mb-sm">
+            <div className="badge badge--primary shimmer-badge mb-sm">
               <HiOutlineShieldCheck /> Verified Elector
             </div>
 
@@ -145,8 +145,8 @@ const VerifyEmail = () => {
               {statusMessage || 'Your email address has been verified. Your decentralized electoral identity is fully activated.'}
             </p>
 
-            <div style={{ background: '#f8fafc', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-secondary)', marginBottom: 'var(--space-xl)', textAlign: 'left' }}>
-              <div style={{ fontSize: '0.86rem', color: '#334155', lineHeight: 1.6 }}>
+            <div style={{ background: 'rgba(5, 7, 15, 0.75)', padding: 'var(--space-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(56, 189, 248, 0.25)', marginBottom: 'var(--space-xl)', textAlign: 'left' }}>
+              <div style={{ fontSize: '0.86rem', color: '#ffffff', lineHeight: 1.6 }}>
                 ✅ Electronic ballot casting permissions unlocked
                 <br />
                 ✅ Constituency voting jurisdiction active
@@ -183,8 +183,8 @@ const VerifyEmail = () => {
             </p>
 
             {/* Resend Box */}
-            <div style={{ background: '#f8fafc', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-secondary)', textAlign: 'left', marginBottom: 'var(--space-xl)' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginBottom: 'var(--space-xs)' }}>
+            <div style={{ background: 'rgba(5, 7, 15, 0.75)', padding: 'var(--space-lg)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(56, 189, 248, 0.25)', textAlign: 'left', marginBottom: 'var(--space-xl)' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: 'var(--space-xs)' }}>
                 Request a New Verification Link
               </h3>
               <p style={{ fontSize: '0.84rem', color: '#64748b', marginBottom: 'var(--space-md)' }}>
