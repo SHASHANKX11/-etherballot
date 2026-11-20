@@ -472,14 +472,14 @@ const Navbar = () => {
           font-size: 13px;
         }
         .navbar--scrolled {
-          top: 0;
+          top: 35px;
           background: rgba(255, 255, 255, 0.98);
-          box-shadow: 0 6px 24px rgba(15, 23, 42, 0.10);
+          box-shadow: 0 4px 20px rgba(15, 23, 42, 0.12);
         }
         .navbar__inner {
           max-width: 1480px;
           margin: 0 auto;
-          height: 64px;
+          height: 68px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -504,53 +504,63 @@ const Navbar = () => {
           line-height: 1.25;
           text-align: left;
           justify-content: center;
-          white-space: nowrap;
+          white-space: nowrap !important;
+          flex-shrink: 0;
         }
         .navbar__gov-org-hi {
-          font-family: 'Noto Sans Devanagari', -apple-system, sans-serif;
-          font-size: 13.5px;
-          font-weight: 700;
-          line-height: 1.35;
+          font-family: 'Noto Sans Devanagari', 'Inter', -apple-system, sans-serif !important;
+          font-size: 13.5px !important;
+          font-weight: 700 !important;
+          line-height: 1.35 !important;
           padding-top: 1px;
-          color: #0f172a;
+          color: #0f172a !important;
           letter-spacing: 0.01em;
-          white-space: nowrap;
+          white-space: nowrap !important;
         }
         .navbar__gov-org-en {
-          font-family: var(--font-heading);
-          font-size: 11px;
-          font-weight: 800;
-          line-height: 1.2;
-          color: #0369a1;
+          font-family: var(--font-heading) !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          line-height: 1.25 !important;
+          color: #0369a1 !important;
           letter-spacing: 0.04em;
-          white-space: nowrap;
+          white-space: nowrap !important;
         }
         .navbar__gov-sub {
-          font-size: 10px;
-          line-height: 1.2;
-          color: #64748b;
-          white-space: nowrap;
+          font-size: 10px !important;
+          line-height: 1.2 !important;
+          color: #64748b !important;
+          white-space: nowrap !important;
           margin-top: 1px;
         }
         .navbar__gov-sub strong {
           color: #2563eb;
         }
 
+        .navbar__quick-actions {
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+        }
+
         .gov-search-trigger-btn {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          padding: 6px 12px;
+          padding: 6px 14px;
           background: rgba(255, 255, 255, 0.95);
-          border: 1px solid rgba(56, 189, 248, 0.28);
+          border: 1px solid rgba(56, 189, 248, 0.35);
           border-radius: var(--radius-full);
           font-size: 12px;
           color: #334155;
           font-weight: 600;
-          white-space: nowrap;
+          white-space: nowrap !important;
           flex-shrink: 0;
           transition: all 0.2s ease;
           cursor: pointer;
+        }
+        .gov-search-trigger-btn span {
+          white-space: nowrap !important;
         }
         .gov-search-trigger-btn:hover {
           background: rgba(224, 242, 254, 0.95);
@@ -681,22 +691,23 @@ const Navbar = () => {
         }
 
         /* Responsive Breakpoints */
-        @media (max-width: 1320px) {
-          .navbar__gov-sub { display: none; }
-          .gov-search-full { display: none; }
-          .gov-search-short { display: inline; }
+        @media (max-width: 1380px) {
+          .navbar__gov-sub { display: none !important; }
+          .gov-search-full { display: none !important; }
+          .gov-search-short { display: inline !important; }
         }
 
-        @media (max-width: 1100px) {
+        @media (max-width: 1220px) {
           .navbar__quick-actions { display: none !important; }
         }
 
         @media (max-width: 960px) {
-          .gov-top-bar { display: none; }
-          .navbar { top: 3px; }
-          .navbar__mobile-toggle { display: block; }
+          .gov-top-bar { display: none !important; }
+          .navbar { top: 3px !important; }
+          .navbar--scrolled { top: 3px !important; }
+          .navbar__mobile-toggle { display: block !important; }
           .navbar__links { display: none !important; }
-          .navbar__auth-buttons { display: none; }
+          .navbar__auth-buttons { display: none !important; }
         }
       `}</style>
     </>

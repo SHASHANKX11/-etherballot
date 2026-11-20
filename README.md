@@ -15,14 +15,34 @@
 </p>
 
 <p align="center">
+  <a href="#-academic-capstone-exhibition-poster"><b>🏛️ Capstone Poster</b></a> &bull;
   <a href="#-localhost-services-endpoints--credentials"><b>🌐 Localhost Services</b></a> &bull;
-  <a href="#-web-application-interface-showcase"><b>📸 Screenshots Showcase</b></a> &bull;
+  <a href="SCREENSHOTS.md"><b>📸 Visual Tour & Screenshots</b></a> &bull;
   <a href="#-key-features"><b>✨ Key Features</b></a> &bull;
   <a href="#-system-architecture"><b>🏛️ Architecture</b></a> &bull;
   <a href="#-how-blockchain-is-used-in-etherballot"><b>⛓️ Blockchain Engine</b></a> &bull;
   <a href="#-getting-started"><b>🚀 Quick Start</b></a> &bull;
   <a href="#-security-audit-scorecard"><b>🔒 Security Audit</b></a>
 </p>
+
+---
+
+## 🏛️ Academic Capstone Exhibition Poster
+
+### Department of Computer Science & Engineering — R. L. Jalappa Institute of Technology
+> **Approved by AICTE, New Delhi | Affiliated to VTU, Belagavi | Accredited by NAAC with "A" Grade | Tamaka, Kolar - 563103**  
+> **Capstone Project Exhibition 2026–27 — Batch B19**  
+> **Project Title:** *ETHERBALLOT: DECENTRALIZED ETHEREUM E-VOTING PLATFORM USING SOLIDITY SMART CONTRACTS*  
+> **Student Authors:** Shashank K (`1RL23CS125`), Abhishek Gowda K (`1RL23CS002`)  
+> **Project Guide:** Prof. G M Ananda Reddy (Assistant Professor, Dept. of CSE)
+
+<p align="center">
+  <a href="SCREENSHOTS.md#️-academic-capstone-technical-exhibition-poster">
+    <img src="./assets/screenshots/live_07_capstone_project_poster.jpg" width="95%" alt="EtherBallot Academic Capstone Project Poster" style="border-radius: 10px; box-shadow: 0 8px 30px rgba(15, 23, 42, 0.15);" />
+  </a>
+</p>
+
+> 📸 **Full Visual Tour & Route Catalog:** Explore all live interfaces, test credentials, and route breakdowns in [**SCREENSHOTS.md**](SCREENSHOTS.md).
 
 ---
 

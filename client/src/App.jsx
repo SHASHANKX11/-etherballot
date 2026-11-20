@@ -31,7 +31,7 @@ function App() {
     <div className="app-container">
       <CyberBackground />
       <Navbar />
-      <main style={{ paddingTop: '102px', flex: 1, position: 'relative', zIndex: 1 }}>
+      <main style={{ paddingTop: '106px', flex: 1, position: 'relative', zIndex: 1 }}>
         <Suspense fallback={<RouteLoader />}>
           <Routes>
             <Route path="/"            element={<Home />} />

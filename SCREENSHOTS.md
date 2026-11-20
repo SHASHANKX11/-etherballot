@@ -1,6 +1,26 @@
 # 📸 EtherBallot — Visual Project Showcase & Screenshots
 
-Welcome to the visual tour and interface documentation for **EtherBallot**, the Decentralized Ethereum Voting System with Biometric Verification and Smart Contract Immutability.
+Welcome to the comprehensive visual tour and interface documentation for **EtherBallot**, the Decentralized Ethereum Voting System with Biometric Verification and Smart Contract Immutability.
+
+---
+
+## 🏛️ Academic Capstone Technical Exhibition Poster
+
+### Department of Computer Science & Engineering — R. L. Jalappa Institute of Technology
+> **Approved by AICTE, New Delhi | Affiliated to VTU, Belagavi | Accredited by NAAC with "A" Grade | Tamaka, Kolar - 563103**  
+> **Project Batch:** B19 (Capstone Project Exhibition 2026–27)  
+> **Authors:** Shashank K (`1RL23CS125`), Abhishek Gowda K (`1RL23CS002`)  
+> **Faculty Guide:** Prof. G M Ananda Reddy (Assistant Professor, Dept. of CSE)
+
+![Capstone Project Poster](./assets/screenshots/live_07_capstone_project_poster.jpg)
+
+### Poster Architectural Specifications:
+- **Smart Contract Engine:** Solidity `^0.8.20` / `^0.8.19` (`contracts/VotingContract.sol`)
+- **Blockchain Execution Layer:** Hardhat v2.19 Local EVM (ChainID: `31337`) & Ethereum Sepolia Testnet
+- **Web3 RPC & Wallet Integration:** Ethers.js v6.x JSON-RPC Provider, MetaMask ECDSA key signing (`secp256k1`)
+- **2FA Biometric & Identity Engine:** Node.js, Express.js, MongoDB, SHA-256 Aadhaar hashing, and Facial CNN descriptors
+- **Gas Profiling & Benchmarks:** `castVote` (~48,214 gas), `registerVoter` (~29,410 gas), `getResults` (0 gas via static `view`)
+- **Dual Double-Voting Prevention:** Address mapping (`hasVoted[msg.sender]`) and Keccak-256 Aadhaar hash mapping (`aadhaarVoted[hash]`)
 
 ---
 
@@ -21,16 +41,18 @@ Welcome to the visual tour and interface documentation for **EtherBallot**, the 
 
 ---
 
-## 🖥️ Screen 01: Ecosystem Landing Page
+## 🖥️ Live Production Interface Tour
+
+### Screen 01: Citizen Gateway & Sovereign Landing Page
 **URL:** `http://localhost:5173/`  
 **Access:** Public Citizen  
 
-> **Description:** The homepage presents the high-security gateway of the Election Commission of India and EtherBallot. Features live on-chain smart contract metrics, active election counters, smart contract gas tracker (Gwei), and sovereign emblem header. It includes the sovereign GIGW accessibility bar (A-, A, A+ font resizer, English/Hindi language toggle, and Toll-Free 1950 Voter Helpline) and the MetaMask `[ 🦊 Connect Wallet ]` pill.
+> **Description:** The homepage presents the high-security gateway of the Election Commission of India and EtherBallot. Features live on-chain smart contract metrics, active election counters, smart contract gas tracker (Gwei), and sovereign emblem header with GIGW accessibility bar (A-, A, A+ font resizer, English/Hindi language toggle, Toll-Free 1950 Helpline) and MetaMask `[ 🦊 Connect Wallet ]` pill.
 
-![01 Home Page](https://raw.githubusercontent.com/SHASHANKX11/-etherballot/main/assets/screenshots/01_home_page.jpg)
+![01 Home Page Live](./assets/screenshots/live_01_home_hero.jpg)
 
-### Key Components:
-- **Sovereign Emblem & Identity:** Dual-lingual branding ("भारत निर्वाचन आयोग / ELECTION COMMISSION OF INDIA").
+#### Key Capabilities:
+- **Sovereign Dual-Lingual Branding:** "भारत निर्वाचन आयोग / ELECTION COMMISSION OF INDIA".
 - **MetaMask Web3 Pill:** Instant wallet connection indicator displaying truncated Ethereum address (`0x...`).
 - **Quick Service Cards:**
   1. *Scan & Verify Voter QR:* Auto-launches the real-time camera scanner modal to verify any e-EPIC card.
@@ -40,13 +62,138 @@ Welcome to the visual tour and interface documentation for **EtherBallot**, the 
 
 ---
 
-## ⚙️ Screen 02: Backend API & Service Telemetry
+### Screen 02: Election Official & Administrator Login
+**URL:** `http://localhost:5173/admin/login`  
+**Access:** Election Officials & Super Administrators  
+**Default Credentials:** `superadmin` / `Admin@123456`
+
+> **Description:** High-security administrative entrance for Chief Election Officers and District Election Magistrates. Features SHA-256 password salting, JWT cryptographic session generation, rate-limited brute-force guards, and append-only administrative login audit logging.
+
+![02 Admin Login Live](./assets/screenshots/live_02_admin_login.jpg)
+
+---
+
+### Screen 03: My Digital Voter ID Card (e-EPIC)
+**URL:** `http://localhost:5173/voter-card` (or `/digital-id`)  
+**Access:** Authenticated Citizen (`EB-2026-000001` / Shashank K)
+
+> **Description:** An official, cryptographically signed sovereign digital voter card adhering to the Election Commission of India e-EPIC format. Features the Ashoka emblem, rainbow security guilloche patterns, official hologram, voter biometric photo, demographic data, and a tamper-proof QR code.
+
+![03 Digital Voter Card Live](./assets/screenshots/live_03_digital_voter_card.jpg)
+
+#### Actions Available on Voter ID:
+- **Scan to Verify:** Opens the real-time camera scanner modal to confirm the card's validity against the active database.
+- **Download as PDF:** Exports a high-resolution, print-ready vector PDF formatted to official ID card dimensions.
+- **Download as PNG:** Generates an ultra-crisp raster image for mobile wallet storage.
+- **Print Voter ID:** Triggers a clean print layout formatted for standard plastic card printers.
+- **Assigned Polling Station:** Displays designated polling station ("Government High School, Bangalore - Booth #42") and live booth check-in eligibility.
+
+---
+
+### Screen 04: Polling Station Camera QR Scanner
+**URL:** `http://localhost:5173/qr-scanner` (also accessible via modal on `/voter-card` & `/`)  
+**Access:** Polling Station Presiding Officers & Citizens  
+
+> **Description:** Real-time polling station check-in scanner powered by an HTML5 Canvas scanning engine and `jsQR`. Analyzes 5 video frames per second (200ms interval) to authenticate electors, match constituency boundaries, and record booth check-in audit logs.
+
+![04 Camera QR Scanner Live](./assets/screenshots/live_04_camera_qr_scanner.jpg)
+
+#### Validation Result States:
+- 🟢 **GREEN (VERIFIED):** Citizen is registered, active, approved, and assigned to this specific polling booth.
+- 🟡 **AMBER (ALREADY CHECKED IN):** Citizen has already been verified at this station. Flags potential double check-in attempt.
+- 🔴 **RED (INVALID_QR / NOT FOUND):** QR code is corrupted, forged, or not found in the sovereign database.
+
+---
+
+### Screen 05: Voter ID Registry & QR Credentials (Admin)
+**URL:** `http://localhost:5173/admin/voters`  
+**Access:** Election Official / Super Administrator  
+
+> **Description:** Full electoral roll registry displaying voter enrollment status, Aadhaar hash integrity, assigned constituency, polling station allocation, and live QR credential scan counts.
+
+![05 Admin Voter Roll Live](./assets/screenshots/live_05_admin_voter_roll.jpg)
+
+#### Features:
+- **Real-Time Synchronization:** Live status reflection from the MongoDB sovereign identity ledger.
+- **Approval & Verification Badges:** Instant visual indicator of voter eligibility (`APPROVED`, `ACTIVE`).
+- **Audit Controls:** Quick-view elector profile, de-activate fraudulent electors, and revoke corrupted credentials.
+
+---
+
+### Screen 06: Sovereign Security Audit Trail & Access Logs
+**URL:** `http://localhost:5173/admin` (Audit Logs section)  
+**Access:** Election Official / Super Administrator  
+
+> **Description:** Append-only security audit stream recording every login, voter verification, card generation, and vote commitment with UTC timestamp, action code, actor identity, and cryptographic success status.
+
+![06 Admin Audit Logs Live](./assets/screenshots/live_06_admin_audit_logs.jpg)
+
+---
+
+## 🗳️ Web3 Smart Contract Ballot & Verification
+
+### Screen 07: Electronic Ballot Casting
+**URL:** `http://localhost:5173/vote`  
+**Access:** Authenticated Electors (Email Verified)  
+
+> **Description:** The ballot casting center presents all candidates contesting in the voter's registered constituency. Each candidate card displays the candidate's name, party affiliation, party symbol, and manifesto link.
+
+![07 Ballot Casting](./assets/screenshots/07_ballot_casting.jpg)
+
+#### Dual-Mode Web3 Submission:
+1. **⚡ Instant Cryptographic Relayer:** Gasless submission where the backend relayer validates the voter's identity and submits the transaction on their behalf.
+2. **🦊 Cast on Ethereum via MetaMask:** Direct client-side Web3 signing where the elector signs the `castVote(electionId, candidateId, keccak256(aadhaar))` transaction directly in their MetaMask wallet extension.
+
+---
+
+### Screen 08: Cryptographic Ballot Receipt
+**URL:** `http://localhost:5173/vote` (post-submission)  
+**Access:** Authenticated Elector  
+
+> **Description:** Once the transaction is mined on Ethereum, the elector is presented with a permanent cryptographic receipt.
+
+![08 Vote Receipt](./assets/screenshots/08_vote_receipt_sealed.jpg)
+
+#### Receipt Features:
+- **Election Name:** Selected election title.
+- **Consensus Status:** `● Confirmed on Blockchain`.
+- **Timestamp (UTC):** Exact block timestamp.
+- **Cryptographic Vote Hash:** 64-character hexadecimal hash (`0x...`) with one-click copy action.
+- **Zero-Knowledge Privacy:** The receipt proves *that* a vote was legitimately cast, without exposing *which* candidate was selected.
+
+---
+
+### Screen 09: Certified Election Results & Audit Center
+**URL:** `http://localhost:5173/results`  
+**Access:** Public Citizens, Journalists, Auditors  
+
+> **Description:** Real-time election telemetry and certified final tallies queried directly from the Ethereum smart contract.
+
+![09 Election Results](./assets/screenshots/09_election_results_analytics.jpg)
+
+#### Analytic Highlights:
+- **Real-Time Bar Charts (Recharts):** Dynamic visual vote share comparison across all contesting candidates.
+- **Candidate Breakdown:** Detailed candidate progress bars displaying exact vote counts and percentages.
+- **Winner Banner:** Automatically triggered when an election phase is marked completed by smart contract consensus.
+- **Independent On-Chain Vote Verifier:** Voters can paste their 64-character or 66-character Ethereum transaction hash to mathematically verify its inclusion on the blockchain.
+
+---
+
+### Screen 10: 3-Factor Voter Authentication & Biometrics
+**URL:** `http://localhost:5173/login` & `/register`  
+**Access:** Registered Citizens  
+
+> **Description:** Multi-layered citizen identity verification combining Aadhaar assertion, time-limited OTP email verification, and live facial neural descriptor extraction (<0.50 Euclidean distance threshold).
+
+![05 Biometric Face AI](./assets/screenshots/05_biometric_face_ai.jpg)
+
+---
+
+## ⚙️ Backend REST API Telemetry
+
 **URL:** `http://localhost:5000/` and `http://localhost:5000/api/health`  
 **Access:** Public / Developer  
 
-> **Description:** The backend Express server runs on port 5000, serving encrypted voter profiles, 128D biometric vector verification, transactional email dispatch (SMTP), and smart contract relay services.
-
-### Sample API Response (`GET /`):
 ```json
 {
   "project": "EtherBallot",
@@ -76,149 +223,13 @@ Welcome to the visual tour and interface documentation for **EtherBallot**, the 
       "aadhaar": "123456789012"
     }
   },
-  "timestamp": "2026-11-20T14:35:00.000Z"
+  "timestamp": "2026-11-20T15:45:00.000Z"
 }
 ```
 
 ---
 
-## 🛡️ Screen 03: Election Official & Admin Portal
-**URL:** `http://localhost:5173/admin/login` & `http://localhost:5173/admin`  
-**Access:** Election Officials & Super Administrators  
-**Credentials:**  
-- **Username:** `superadmin`  
-- **Password:** `Admin@123456`  
-
-> **Description:** The administrative portal allows the Chief Election Officer and State Election Commissioners to oversee the voting infrastructure, register elections, configure candidate rosters, audit the electoral roll, inspect append-only security logs, and monitor node telemetry.
-
-![10 Admin Dashboard](https://raw.githubusercontent.com/SHASHANKX11/-etherballot/main/assets/screenshots/10_admin_dashboard.jpg)
-
-### Key Modules in Admin Dashboard:
-1. **Executive Metrics Overview:** Total enrolled electors, active verified electors, managed election officers, and live blockchain system events.
-2. **State-Wise Enrolled Voter Distribution:** Interactive bar charts illustrating geographical distribution across Indian states.
-3. **Elections Management:** Configure election type (National / State / Municipal), start/end timestamps, candidate bios, and party symbols.
-4. **Electoral Roll (`/admin/voters`):** Complete registry of voters with Aadhaar hash, contact info, jurisdiction, active toggle, and EPIC ID.
-5. **Security Audit Trail:** Immutable event stream recording every login, voter verification, card generation, and vote commitment.
-
----
-
-## 🗳️ Screen 04: Voter Sign-In Portal (3-Factor Authentication)
-**URL:** `http://localhost:5173/login`  
-**Access:** Registered Citizens  
-**Demo Elector Credentials:**  
-- **Aadhaar:** `123456789012` (or click `⚡ DEMO AADHAAR: 111122223333`)  
-- **Voter ID:** `EB-2026-000001` (Shashank K)  
-- **QR Login:** Click `[ 📷 Scan Voter QR (Camera) ]` tab ➔ `⚡ 1-Click Demo Elector Verify`
-
-> **Description:** EtherBallot features a rigorous 3-Factor Authentication pipeline to guarantee that only the legitimate citizen can access their electronic ballot.
-
-![06 Voter Sign In](https://raw.githubusercontent.com/SHASHANKX11/-etherballot/main/assets/screenshots/06_voter_login.jpg)
-
-### 3-Factor Authentication Stages:
-```
-┌─────────────────────────┐    ┌─────────────────────────┐    ┌─────────────────────────┐
-│         STEP 1          │    │         STEP 2          │    │         STEP 3          │
-│   Identity Assertion    │───►│    Email Code Check     │───►│  Biometric Facial AI    │
-│  (Aadhaar or QR Code)   │    │  (Time-Limited OTP)     │    │  (128D Vector Match)    │
-└─────────────────────────┘    └─────────────────────────┘    └─────────────────────────┘
-```
-
-1. **Step 1 — Identity Assertion:** Voter inputs their 12-digit Aadhaar number OR scans their physical/digital e-EPIC QR code using their device camera.
-2. **Step 2 — Email Verification Code:** A 6-digit verification code is generated and dispatched to the voter's registered email address with a 5-minute cooldown timer.
-3. **Step 3 — Biometric Facial AI:** The camera captures a live facial frame. `face-api.js` extracts a 128-dimensional neural facial descriptor and compares it using Euclidean distance thresholding (<0.50) against the registration embedding.
-
-![05 Biometric Face AI](https://raw.githubusercontent.com/SHASHANKX11/-etherballot/main/assets/screenshots/05_biometric_face_ai.jpg)
-
----
-
-## 🆔 Screen 05: Digital Voter ID Card (e-EPIC)
-**URL:** `http://localhost:5173/voter-card` (or `/digital-id`)  
-**Access:** Authenticated Citizen  
-
-> **Description:** An official, cryptographically signed sovereign digital voter card adhering to the Election Commission of India e-EPIC format. Features the Ashoka emblem, rainbow security guilloche patterns, official hologram, voter biometric photo, demographic data, and a tamper-proof QR code.
-
-### Actions Available on Voter ID:
-- **Scan to Verify:** Opens the real-time camera scanner modal to confirm the card's validity against the active database.
-- **Download as PDF:** Exports a high-resolution, print-ready vector PDF formatted to official ID card dimensions.
-- **Download as PNG:** Generates an ultra-crisp raster image for mobile wallet storage.
-- **Print Voter ID:** Triggers a clean print layout formatted for standard plastic card printers.
-- **Assigned Polling Station:** Displays the voter's constituency, designated polling station, and live booth check-in eligibility.
-
----
-
-## 📷 Screen 06: Polling Station Camera QR Scanner
-**URL:** `http://localhost:5173/qr-scanner` (and modal on `/voter-card` & `/`)  
-**Access:** Polling Station Presiding Officers & Citizens  
-
-> **Description:** Designed for polling station officers on election day. Operates an ultra-fast 200ms frame scanning loop utilizing HTML5 Canvas and `jsQR`. Officers can point their phone, tablet, or webcam at a citizen's e-EPIC card to verify their identity and prevent duplicate polling booth entries.
-
-### Validation Result States:
-- 🟢 **GREEN (VERIFIED VOTER):** Citizen is registered, active, approved, and assigned to this specific polling station.
-- 🟡 **AMBER (ALREADY CHECKED IN):** Citizen has already been verified at this station. Flags potential double check-in attempt.
-- 🔴 **RED (INVALID / NOT FOUND):** QR code is corrupted, forged, or not found in the sovereign database.
-
----
-
-## 🗳️ Screen 07: Electronic Ballot Casting
-**URL:** `http://localhost:5173/vote`  
-**Access:** Authenticated Electors (Email Verified)  
-
-> **Description:** The ballot casting center presents all candidates contesting in the voter's registered constituency. Each candidate card displays the candidate's name, party affiliation, party symbol, and manifesto link.
-
-![07 Ballot Casting](https://raw.githubusercontent.com/SHASHANKX11/-etherballot/main/assets/screenshots/07_ballot_casting.jpg)
-
-### Dual-Mode Web3 Submission:
-1. **⚡ Instant Cryptographic Relayer:** Gasless submission where the backend relayer validates the voter's identity and submits the transaction on their behalf.
-2. **🦊 Cast on Ethereum via MetaMask:** Direct client-side Web3 signing where the elector signs the `castVote(electionId, candidateId, keccak256(aadhaar))` transaction directly in their MetaMask wallet extension.
-
----
-
-## 📜 Screen 08: Cryptographic Ballot Receipt
-**URL:** `http://localhost:5173/vote` (post-submission)  
-**Access:** Authenticated Elector  
-
-> **Description:** Once the transaction is mined on Ethereum, the elector is presented with a permanent cryptographic receipt.
-
-![08 Vote Receipt](https://raw.githubusercontent.com/SHASHANKX11/-etherballot/main/assets/screenshots/08_vote_receipt_sealed.jpg)
-
-### Receipt Features:
-- **Election Name:** Selected election title.
-- **Consensus Status:** `● Confirmed on Blockchain`.
-- **Timestamp (UTC):** Exact block timestamp.
-- **Cryptographic Vote Hash:** 64-character hexadecimal hash (`0x...`) with one-click copy action.
-- **Zero-Knowledge Privacy:** The receipt proves *that* a vote was legitimately cast, without exposing *which* candidate was selected.
-
----
-
-## 📊 Screen 09: Certified Election Results & Audit Center
-**URL:** `http://localhost:5173/results`  
-**Access:** Public Citizens, Journalists, Auditors  
-
-> **Description:** Real-time election telemetry and certified final tallies queried directly from the Ethereum smart contract.
-
-![09 Election Results](https://raw.githubusercontent.com/SHASHANKX11/-etherballot/main/assets/screenshots/09_election_results_analytics.jpg)
-
-### Analytic Highlights:
-- **Real-Time Bar Charts (Recharts):** Dynamic visual vote share comparison across all contesting candidates.
-- **Candidate Breakdown:** Detailed candidate progress bars displaying exact vote counts and percentages.
-- **Winner Banner:** Automatically triggered when an election phase is marked completed by smart contract consensus.
-- **Independent On-Chain Vote Verifier:** Voters can paste their 64-character or 66-character Ethereum transaction hash to mathematically verify its inclusion on the blockchain.
-
----
-
-## 📝 Screen 10: Form 6 — New Voter Registration
-**URL:** `http://localhost:5173/register`  
-**Access:** Unregistered Indian Citizens (Age 18+)  
-
-> **Description:** The official Form 6 digital enrollment pipeline. Citizens register their 12-digit Aadhaar number, personal details, address, state, district, and constituency, followed by GPS geolocation and live camera biometric face enrollment.
-
-![02 Voter Registration](https://raw.githubusercontent.com/SHASHANKX11/-etherballot/main/assets/screenshots/02_voter_registration.jpg)
-
----
-
 ## 🚀 Running the Project Locally
-
-To run the application and test all interfaces documented above:
 
 ```bash
 # 1. Clone repository
