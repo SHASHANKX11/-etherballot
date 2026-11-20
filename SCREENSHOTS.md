@@ -4,26 +4,6 @@ Welcome to the comprehensive visual tour and interface documentation for **Ether
 
 ---
 
-## 🏛️ Academic Capstone Technical Exhibition Poster
-
-### Department of Computer Science & Engineering — R. L. Jalappa Institute of Technology
-> **Approved by AICTE, New Delhi | Affiliated to VTU, Belagavi | Accredited by NAAC with "A" Grade | Tamaka, Kolar - 563103**  
-> **Project Batch:** B19 (Capstone Project Exhibition 2026–27)  
-> **Authors:** Shashank K (`1RL23CS125`), Abhishek Gowda K (`1RL23CS002`)  
-> **Faculty Guide:** Prof. G M Ananda Reddy (Assistant Professor, Dept. of CSE)
-
-![Capstone Project Poster](./assets/screenshots/live_07_capstone_project_poster.jpg)
-
-### Poster Architectural Specifications:
-- **Smart Contract Engine:** Solidity `^0.8.20` / `^0.8.19` (`contracts/VotingContract.sol`)
-- **Blockchain Execution Layer:** Hardhat v2.19 Local EVM (ChainID: `31337`) & Ethereum Sepolia Testnet
-- **Web3 RPC & Wallet Integration:** Ethers.js v6.x JSON-RPC Provider, MetaMask ECDSA key signing (`secp256k1`)
-- **2FA Biometric & Identity Engine:** Node.js, Express.js, MongoDB, SHA-256 Aadhaar hashing, and Facial CNN descriptors
-- **Gas Profiling & Benchmarks:** `castVote` (~48,214 gas), `registerVoter` (~29,410 gas), `getResults` (0 gas via static `view`)
-- **Dual Double-Voting Prevention:** Address mapping (`hasVoted[msg.sender]`) and Keccak-256 Aadhaar hash mapping (`aadhaarVoted[hash]`)
-
----
-
 ## 📌 Quick Access Directory & Credentials
 
 | Service / Interface | Localhost URL | Required Role | Test Credentials / Quick-Fill | Key Features |
