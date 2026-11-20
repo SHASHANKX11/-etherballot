@@ -40,18 +40,25 @@ const Navbar = () => {
     navigate('/');
   };
 
+  useEffect(() => {
+    document.documentElement.style.fontSize = '100%';
+  }, []);
+
   const handleFontResize = (direction) => {
-    if (direction === 'inc' && fontSizeScale < 1.15) {
+    const mainEl = document.querySelector('main');
+    if (!mainEl) return;
+
+    if (direction === 'inc' && fontSizeScale < 1.25) {
       const next = fontSizeScale + 0.05;
       setFontSizeScale(next);
-      document.documentElement.style.fontSize = `${next * 100}%`;
-    } else if (direction === 'dec' && fontSizeScale > 0.9) {
+      mainEl.style.fontSize = `${next * 100}%`;
+    } else if (direction === 'dec' && fontSizeScale > 0.85) {
       const next = fontSizeScale - 0.05;
       setFontSizeScale(next);
-      document.documentElement.style.fontSize = `${next * 100}%`;
+      mainEl.style.fontSize = `${next * 100}%`;
     } else if (direction === 'reset') {
       setFontSizeScale(1);
-      document.documentElement.style.fontSize = '100%';
+      mainEl.style.fontSize = '100%';
     }
   };
 
@@ -138,12 +145,12 @@ const Navbar = () => {
         <div className="navbar__inner">
           {/* Official Emblem & Branding */}
           <Link to="/" className="navbar__gov-brand">
-            <AnimatedEmblem size={44} />
+            <AnimatedEmblem size={40} />
             <div className="navbar__brand-text-container">
               <div className="navbar__gov-org-hi">भारत निर्वाचन आयोग</div>
               <div className="navbar__gov-org-en">ELECTION COMMISSION OF INDIA</div>
               <div className="navbar__gov-sub">
-                <strong>EtherBallot</strong> • Decentralized Autonomous Voting Infrastructure
+                <strong>EtherBallot</strong> • Decentralized Voting System
               </div>
             </div>
           </Link>
@@ -155,8 +162,9 @@ const Navbar = () => {
               onClick={() => setIsSearchModalOpen(true)}
               title="Search Electoral Roll or Download e-EPIC"
             >
-              <HiOutlineSearch size={16} />
-              <span>Search in Electoral Roll / e-EPIC</span>
+              <HiOutlineSearch size={15} />
+              <span className="gov-search-full">Search Electoral Roll / e-EPIC</span>
+              <span className="gov-search-short">Search Roll</span>
             </button>
           </div>
 
@@ -183,20 +191,21 @@ const Navbar = () => {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
-                padding: '6px 12px',
-                borderRadius: 8,
+                gap: 5,
+                padding: '5px 10px',
+                borderRadius: 7,
                 border: isConnected ? '1.5px solid #10b981' : '1.5px solid #38bdf8',
                 background: isConnected ? 'rgba(16, 185, 129, 0.08)' : 'rgba(56, 189, 248, 0.08)',
                 color: isConnected ? '#059669' : '#0284c7',
                 fontWeight: 600,
-                fontSize: '0.78rem',
+                fontSize: '0.75rem',
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
                 transition: 'all 0.2s ease',
               }}
               title={isConnected ? `Connected: ${account}. Click to disconnect.` : 'Connect MetaMask Ethereum Wallet'}
             >
-              <span style={{ fontSize: '1rem', lineHeight: 1 }}>🦊</span>
+              <span style={{ fontSize: '0.95rem', lineHeight: 1 }}>🦊</span>
               <span className="hide-mobile">
                 {isConnected ? `${account.slice(0, 6)}...${account.slice(-4)}` : 'Connect Wallet'}
               </span>
@@ -310,42 +319,45 @@ const Navbar = () => {
       <style>{`
         /* ─── Top Strip (Blue - Light Blue - White - Royal Blue) ─── */
         .gov-tricolor-strip {
-          height: 4px;
+          height: 3px;
           background: linear-gradient(90deg, #2563eb 0%, #38bdf8 30%, #ffffff 50%, #38bdf8 70%, #2563eb 100%);
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           z-index: 102;
-          box-shadow: 0 0 14px rgba(56, 189, 248, 0.45);
+          box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
         }
 
         /* ─── Sovereign Top Bar (Light Government) ─── */
         .gov-top-bar {
-          background: linear-gradient(90deg, #ffffff 0%, #eef5fc 50%, #ffffff 100%);
+          background: linear-gradient(90deg, #ffffff 0%, #f1f5f9 50%, #ffffff 100%);
           color: #0f172a;
-          font-size: 0.76rem;
-          height: 36px;
+          font-size: 11.5px;
+          height: 32px;
           position: fixed;
-          top: 4px;
+          top: 3px;
           left: 0;
           right: 0;
           z-index: 101;
           display: flex;
           align-items: center;
-          border-bottom: 1px solid rgba(37, 99, 235, 0.14);
+          border-bottom: 1px solid rgba(37, 99, 235, 0.12);
         }
         .gov-top-bar__inner {
+          max-width: 1480px;
+          margin: 0 auto;
+          width: 100%;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding-top: 0 !important;
-          padding-bottom: 0 !important;
+          padding: 0 16px !important;
         }
         .gov-top-bar__left, .gov-top-bar__right {
           display: flex;
           align-items: center;
           gap: 8px;
+          white-space: nowrap;
         }
         .gov-skip-link {
           position: absolute;
@@ -353,59 +365,70 @@ const Navbar = () => {
           top: 0;
           background: #ffffff;
           color: #0f172a;
-          padding: 6px 12px;
+          padding: 4px 8px;
           z-index: 1000;
           font-weight: 700;
         }
         .gov-skip-link:focus {
           left: 10px;
-          top: 4px;
+          top: 2px;
         }
         .gov-title-hi {
-          font-family: 'Noto Sans Devanagari', sans-serif;
+          font-family: 'Noto Sans Devanagari', -apple-system, sans-serif;
           font-weight: 700;
           color: #0369a1;
+          font-size: 12px;
+          line-height: 1;
         }
         .gov-title-en {
           font-weight: 600;
           letter-spacing: 0.02em;
+          color: #334155;
+          font-size: 11.5px;
+          line-height: 1;
         }
         .gov-auth-tag {
-          font-size: 0.68rem;
+          font-size: 10.5px;
           background: rgba(37, 99, 235, 0.08);
           padding: 1px 6px;
-          border-radius: 3px;
-          color: #334155;
+          border-radius: 4px;
+          color: #475569;
+          font-weight: 500;
         }
         .gov-divider {
-          color: rgba(15, 23, 42, 0.3);
+          color: rgba(15, 23, 42, 0.25);
+          font-size: 11px;
         }
         .gov-helpline-pill {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 5px;
           color: #334155;
-          font-size: 0.74rem;
+          font-size: 11.5px;
           padding: 2px 8px;
-          background: rgba(37, 99, 235, 0.08);
+          background: rgba(37, 99, 235, 0.07);
           border-radius: 4px;
           transition: background 0.2s;
+          white-space: nowrap;
         }
         .gov-helpline-pill:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(37, 99, 235, 0.14);
         }
         .gov-font-resizer {
           display: flex;
           gap: 3px;
+          align-items: center;
         }
         .gov-font-resizer button {
           padding: 1px 6px;
           background: rgba(37, 99, 235, 0.08);
           border-radius: 3px;
           color: #334155;
-          font-size: 0.7rem;
+          font-size: 11px;
           font-weight: 700;
           transition: all 0.2s;
+          border: none;
+          cursor: pointer;
         }
         .gov-font-resizer button:hover {
           background: #38bdf8;
@@ -416,16 +439,19 @@ const Navbar = () => {
           align-items: center;
           gap: 4px;
           color: #334155;
+          font-size: 11.5px;
         }
         .gov-lang-btn {
           background: none;
-          color: #475569;
-          font-size: 0.72rem;
+          border: none;
+          color: #64748b;
+          font-size: 11.5px;
           padding: 0 2px;
           font-weight: 600;
+          cursor: pointer;
         }
         .gov-lang-btn.active {
-          color: #38bdf8;
+          color: #0284c7;
           font-weight: 800;
           text-decoration: underline;
         }
@@ -433,38 +459,40 @@ const Navbar = () => {
         /* ─── Main Navbar (Light Sovereign) ─── */
         .navbar {
           position: fixed;
-          top: 40px;
+          top: 35px;
           left: 0;
           right: 0;
           z-index: 100;
-          padding: 0 var(--space-md);
-          background: rgba(255, 255, 255, 0.92);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(37, 99, 235, 0.14);
-          box-shadow: 0 4px 25px rgba(15, 23, 42, 0.10);
+          background: rgba(255, 255, 255, 0.96);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border-bottom: 1px solid rgba(37, 99, 235, 0.12);
+          box-shadow: 0 3px 18px rgba(15, 23, 42, 0.06);
           transition: all var(--transition-normal);
+          font-size: 13px;
         }
         .navbar--scrolled {
           top: 0;
           background: rgba(255, 255, 255, 0.98);
-          box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12), 0 0 20px rgba(56, 189, 248, 0.10);
-          border-bottom-color: rgba(56, 189, 248, 0.35);
+          box-shadow: 0 6px 24px rgba(15, 23, 42, 0.10);
         }
         .navbar__inner {
-          max-width: 1240px;
+          max-width: 1480px;
           margin: 0 auto;
-          height: 74px;
+          height: 64px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: var(--space-md);
+          gap: 12px;
+          padding: 0 16px;
         }
         .navbar__gov-brand {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
           text-decoration: none;
+          flex-shrink: 0;
+          white-space: nowrap;
           transition: transform 0.2s ease;
         }
         .navbar__gov-brand:hover {
@@ -473,112 +501,139 @@ const Navbar = () => {
         .navbar__brand-text-container {
           display: flex;
           flex-direction: column;
-          line-height: 1.15;
+          line-height: 1.25;
           text-align: left;
+          justify-content: center;
+          white-space: nowrap;
         }
         .navbar__gov-org-hi {
-          font-family: 'Noto Sans Devanagari', sans-serif;
-          font-size: 0.95rem;
-          font-weight: 900;
+          font-family: 'Noto Sans Devanagari', -apple-system, sans-serif;
+          font-size: 13.5px;
+          font-weight: 700;
+          line-height: 1.35;
+          padding-top: 1px;
           color: #0f172a;
           letter-spacing: 0.01em;
+          white-space: nowrap;
         }
         .navbar__gov-org-en {
           font-family: var(--font-heading);
-          font-size: 0.78rem;
+          font-size: 11px;
           font-weight: 800;
+          line-height: 1.2;
           color: #0369a1;
           letter-spacing: 0.04em;
+          white-space: nowrap;
         }
         .navbar__gov-sub {
-          font-size: 0.7rem;
-          color: #94a3b8;
+          font-size: 10px;
+          line-height: 1.2;
+          color: #64748b;
+          white-space: nowrap;
           margin-top: 1px;
         }
         .navbar__gov-sub strong {
-          color: #38bdf8;
+          color: #2563eb;
         }
-        
+
         .gov-search-trigger-btn {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px 16px;
-          background: rgba(255, 255, 255, 0.96);
-          border: 1px solid rgba(56, 189, 248, 0.25);
+          gap: 6px;
+          padding: 6px 12px;
+          background: rgba(255, 255, 255, 0.95);
+          border: 1px solid rgba(56, 189, 248, 0.28);
           border-radius: var(--radius-full);
-          font-size: 0.84rem;
+          font-size: 12px;
           color: #334155;
           font-weight: 600;
-          transition: all 0.25s ease;
+          white-space: nowrap;
+          flex-shrink: 0;
+          transition: all 0.2s ease;
           cursor: pointer;
-          backdrop-filter: blur(8px);
         }
         .gov-search-trigger-btn:hover {
           background: rgba(224, 242, 254, 0.95);
           border-color: #38bdf8;
           color: #0f172a;
-          box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+          box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
           transform: translateY(-1px);
+        }
+        .gov-search-short {
+          display: none;
         }
 
         .navbar__links {
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 2px;
+          flex-shrink: 0;
         }
         .navbar__link {
-          padding: 8px 16px;
-          border-radius: var(--radius-md);
-          font-size: 0.9rem;
+          padding: 6px 10px;
+          border-radius: 6px;
+          font-size: 13px;
           font-weight: 600;
           color: #334155;
+          white-space: nowrap;
+          line-height: 1.4;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
           transition: all var(--transition-fast);
-          position: relative;
         }
         .navbar__link:hover {
           color: #0f172a;
-          background: rgba(56, 189, 248, 0.1);
-          transform: translateY(-1px);
+          background: rgba(56, 189, 248, 0.12);
         }
         .navbar__link--active {
-          color: #38bdf8;
-          background: rgba(56, 189, 248, 0.15);
-          border-bottom: 2px solid #38bdf8;
+          color: #0284c7;
+          background: rgba(56, 189, 248, 0.16);
+          border-bottom: 2px solid #0284c7;
           font-weight: 700;
-          box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
         }
 
         .navbar__right {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 6px;
+          flex-shrink: 0;
         }
         .navbar__user {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
+          flex-shrink: 0;
         }
         .navbar__user-info {
           display: flex;
           flex-direction: column;
           align-items: flex-end;
           line-height: 1.2;
+          white-space: nowrap;
         }
         .navbar__user-name {
-          font-size: 0.88rem;
+          font-size: 13px;
           font-weight: 700;
           color: #0f172a;
         }
         .navbar__user-role {
-          font-size: 0.72rem;
-          color: #38bdf8;
+          font-size: 11px;
+          color: #0284c7;
           font-weight: 600;
         }
         .navbar__auth-buttons {
           display: flex;
-          gap: 8px;
+          gap: 6px;
           align-items: center;
+          flex-shrink: 0;
+        }
+        .navbar__auth-buttons .btn {
+          white-space: nowrap;
+          font-size: 12px;
+          padding: 6px 11px;
+          border-radius: 6px;
+          font-weight: 600;
         }
         .navbar__mobile-toggle {
           display: none;
@@ -586,15 +641,17 @@ const Navbar = () => {
           color: #0f172a;
           padding: 6px;
           border-radius: 6px;
+          border: none;
+          cursor: pointer;
         }
         .navbar__mobile-menu {
           position: absolute;
-          top: 74px;
+          top: 64px;
           left: 0;
           right: 0;
           background: rgba(255, 255, 255, 0.98);
           border-bottom: 2px solid #38bdf8;
-          padding: var(--space-lg);
+          padding: var(--space-md);
           display: flex;
           flex-direction: column;
           gap: 8px;
@@ -602,33 +659,43 @@ const Navbar = () => {
           backdrop-filter: blur(20px);
         }
         .navbar__mobile-link {
-          padding: 12px 16px;
+          padding: 10px 14px;
           border-radius: var(--radius-sm);
           color: #334155;
           font-weight: 600;
-          font-size: 0.95rem;
+          font-size: 0.88rem;
         }
         .navbar__mobile-link:hover,
         .navbar__mobile-link--active {
           background: rgba(56, 189, 248, 0.15);
-          color: #38bdf8;
+          color: #0284c7;
           font-weight: 700;
         }
         .navbar__mobile-auth-group {
-          margin-top: var(--space-md);
-          padding-top: var(--space-md);
+          margin-top: var(--space-sm);
+          padding-top: var(--space-sm);
           border-top: 1px solid var(--border-primary);
           display: flex;
           flex-direction: column;
           gap: 8px;
         }
 
-        @media (max-width: 992px) {
+        /* Responsive Breakpoints */
+        @media (max-width: 1320px) {
+          .navbar__gov-sub { display: none; }
+          .gov-search-full { display: none; }
+          .gov-search-short { display: inline; }
+        }
+
+        @media (max-width: 1100px) {
+          .navbar__quick-actions { display: none !important; }
+        }
+
+        @media (max-width: 960px) {
           .gov-top-bar { display: none; }
-          .navbar { top: 4px; }
+          .navbar { top: 3px; }
           .navbar__mobile-toggle { display: block; }
           .navbar__links { display: none !important; }
-          .navbar__quick-actions { display: none !important; }
           .navbar__auth-buttons { display: none; }
         }
       `}</style>

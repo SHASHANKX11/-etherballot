@@ -180,6 +180,99 @@ app.use('/api/voting', votingRoutes);
 app.use('/api/voters', voterRoutes);
 app.use('/api/voter-card', voterCardRoutes);
 
+// ═══════════════════════════════════════════
+//  STATIC SCREENSHOTS UTILITY & ASSETS SERVING
+// ═══════════════════════════════════════════
+const copyScreenshots = () => {
+  try {
+    const brainDir = 'C:\\Users\\SHASHANK K 11\\.gemini\\antigravity\\brain\\0133a98c-26c9-4afe-98ef-d7f9941c469b';
+    const destDir = path.join(__dirname, '../assets/screenshots');
+    const clientPublicScreenshots = path.join(__dirname, '../client/public/screenshots');
+
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+    if (!fs.existsSync(clientPublicScreenshots)) fs.mkdirSync(clientPublicScreenshots, { recursive: true });
+
+    const files = [
+      { src: 'etherballot_01_home_hero_1793761849962.jpg', dest: '01_home_page.jpg' },
+      { src: 'etherballot_02_voter_registration_aadhaar_1793761871633.jpg', dest: '02_voter_registration.jpg' },
+      { src: 'etherballot_03_registration_details_gps_1793761894740.jpg', dest: '03_registration_gps.jpg' },
+      { src: 'etherballot_04_email_verification_otp_1793761915741.jpg', dest: '04_email_verification_otp.jpg' },
+      { src: 'etherballot_05_biometric_face_ai_1793761939637.jpg', dest: '05_biometric_face_ai.jpg' },
+      { src: 'etherballot_06_voter_signin_portal_1793761959904.jpg', dest: '06_voter_login.jpg' },
+      { src: 'etherballot_07_ballot_casting_1793761981659.jpg', dest: '07_ballot_casting.jpg' },
+      { src: 'etherballot_08_vote_receipt_sealed_1793762006376.jpg', dest: '08_vote_receipt_sealed.jpg' },
+      { src: 'etherballot_09_election_results_analytics_1793762059018.jpg', dest: '09_election_results_analytics.jpg' },
+      { src: 'etherballot_10_admin_audit_dashboard_1793762117159.jpg', dest: '10_admin_dashboard.jpg' }
+    ];
+
+    for (const f of files) {
+      const srcPath = path.join(brainDir, f.src);
+      if (fs.existsSync(srcPath)) {
+        fs.copyFileSync(srcPath, path.join(destDir, f.dest));
+        fs.copyFileSync(srcPath, path.join(clientPublicScreenshots, f.dest));
+      }
+    }
+
+    const stepFiles = [
+      { step: '1803', dest: '11_navbar_metamask_connected.png' },
+      { step: '1825', dest: '12_voter_login_qr_tab.png' },
+      { step: '1865', dest: '13_digital_voter_card_epic.png' },
+      { step: '1881', dest: '14_camera_qr_scanner_modal.png' },
+      { step: '1885', dest: '15_qr_verified_result_modal.png' },
+      { step: '1900', dest: '16_polling_officer_scanner.png' },
+      { step: '1961', dest: '17_admin_overview_portal.png' },
+      { step: '1965', dest: '18_admin_electoral_roll.png' }
+    ];
+
+    for (const s of stepFiles) {
+      const sPath = path.join(brainDir, '.system_generated', 'steps', s.step, 'media_0.png');
+      if (fs.existsSync(sPath)) {
+        fs.copyFileSync(sPath, path.join(destDir, s.dest));
+        fs.copyFileSync(sPath, path.join(clientPublicScreenshots, s.dest));
+      }
+    }
+  } catch (err) {
+    console.error('Error synchronizing screenshots:', err.message);
+  }
+};
+copyScreenshots();
+
+app.use('/assets', express.static(path.join(__dirname, '../assets')));
+
+// Root API Overview & Service Endpoint
+app.get('/', (req, res) => {
+  res.json({
+    project: 'EtherBallot',
+    description: 'Decentralized Ethereum Voting System with Biometric Verification',
+    version: '2.0.0',
+    status: 'OPERATIONAL',
+    environment: NODE_ENV,
+    network: 'Ethereum EVM (Sepolia Testnet / Local)',
+    services: {
+      client: process.env.CLIENT_URL || 'http://localhost:5173',
+      health: 'http://localhost:5000/api/health',
+      auth: 'http://localhost:5000/api/auth',
+      elections: 'http://localhost:5000/api/elections',
+      voting: 'http://localhost:5000/api/voting',
+      voterCard: 'http://localhost:5000/api/voter-card',
+      admin: 'http://localhost:5000/api/admin'
+    },
+    demoCredentials: {
+      admin: {
+        url: 'http://localhost:5173/admin/login',
+        username: 'superadmin',
+        password: 'Admin@123456'
+      },
+      voter: {
+        url: 'http://localhost:5173/login',
+        voterId: 'EB-2026-000001',
+        aadhaar: '123456789012'
+      }
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check (no sensitive info exposed)
 app.get('/api/health', (req, res) => {
   res.json({

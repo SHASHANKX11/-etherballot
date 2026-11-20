@@ -53,16 +53,24 @@ By fusing **EVM Smart Contracts**, **Client-Side AI Biometrics (`face-api.js`)**
 3. **Decentralized Balloting**: Eligible voters sign transactions via Web3 wallets (MetaMask) directly interacting with Ethereum smart contracts.
 4. **Cryptographic Proofs & Audit Trail**: Every vote and administrative action generates an immutable audit record and updates on-chain state without disclosing voter identity.
 
-### 🌐 Localhost Services & Endpoints
+### 🌐 Localhost Services, Endpoints & Test Credentials
 
-When running locally, EtherBallot services are hosted at:
+When running locally, EtherBallot services and interfaces are hosted at:
 
-| Service | Localhost URL | Port | Description | Access / Credentials |
-|:---|:---|:---:|:---|:---|
-| **Voter Web Portal** | [`http://localhost:5173`](http://localhost:5173) | `5173` | React 18 / Vite Client for Voters & Ballots | Public Citizen Access |
-| **Admin Dashboard** | [`http://localhost:5173/admin/login`](http://localhost:5173/admin/login) | `5173` | Administrative Election Management & Monitoring | `superadmin` / `Admin@123456` |
-| **Backend REST API** | [`http://localhost:5000`](http://localhost:5000) | `5000` | Express API Server base endpoint | Bearer JWT / Protected Endpoints |
-| **API Health Check** | [`http://localhost:5000/api/health`](http://localhost:5000/api/health) | `5000` | Server status and database health check | Public Status Probe |
+| Service / Interface | Localhost URL | Port | Access Role | Test Credentials / Demo Access | Description |
+|:---|:---|:---:|:---|:---|:---|
+| **Citizen Web Portal** | [`http://localhost:5173`](http://localhost:5173) | `5173` | Public Citizen | N/A | React 18 / Vite Client, GIGW Accessibility, Live Gas Tracker |
+| **Backend REST API** | [`http://localhost:5000`](http://localhost:5000) | `5000` | Public / Bearer | N/A | Express API root overview, service routes & JSON telemetry |
+| **API Health Check** | [`http://localhost:5000/api/health`](http://localhost:5000/api/health) | `5000` | Public | N/A | Server status, database health probe & timestamp |
+| **Admin Portal Login** | [`http://localhost:5173/admin/login`](http://localhost:5173/admin/login) | `5173` | Election Official | **Username:** `superadmin`<br>**Password:** `Admin@123456` | Chief Election Officer & State Admin sign-in |
+| **Admin Dashboard** | [`http://localhost:5173/admin`](http://localhost:5173/admin) | `5173` | Super Admin | Log in via Admin Login | Metrics, Election creation, Electoral Roll & audit logs |
+| **Voter Sign-In Portal** | [`http://localhost:5173/login`](http://localhost:5173/login) | `5173` | Registered Elector | **Aadhaar:** `123456789012`<br>**Voter ID:** `EB-2026-000001` | Dual-mode login (Aadhaar or 📷 QR Camera Scanner) + 3FA |
+| **Digital Voter ID Card** | [`http://localhost:5173/voter-card`](http://localhost:5173/voter-card) | `5173` | Registered Elector | View via Voter Login | e-EPIC card, hologram, QR code, PDF/PNG download, print |
+| **Polling QR Scanner** | [`http://localhost:5173/qr-scanner`](http://localhost:5173/qr-scanner) | `5173` | Polling Officer | Public / Official | Real-time camera scanner, 200ms frame decode, booth check-in |
+| **Electronic Ballot** | [`http://localhost:5173/vote`](http://localhost:5173/vote) | `5173` | Verified Elector | View via Voter Login | Candidate selection, MetaMask on-chain signing, Instant Relayer |
+| **Election Results** | [`http://localhost:5173/results`](http://localhost:5173/results) | `5173` | Public Citizen | N/A | Live Recharts vote distribution, winner banner, on-chain hash verifier |
+
+> 📷 **Visual Walkthrough & Screenshot Catalog:** Full screenshots and interface breakdowns are available in [**SCREENSHOTS.md**](SCREENSHOTS.md).
 
 ---
 
@@ -71,9 +79,24 @@ When running locally, EtherBallot services are hosted at:
 - 👤 **Biometric Face Recognition**:
   - 128D facial vector extraction using SSD MobileNet & ResNet embeddings in `face-api.js`.
   - Euclidean distance thresholding (<0.50 threshold) preventing proxy voting.
+- 🆔 **Digital Voter ID Card (e-EPIC)**:
+  - Cryptographically signed digital voter card adhering to the Election Commission of India e-EPIC standard.
+  - Features official Ashoka emblem, rainbow security guilloche patterns, hologram, voter biometric photo, and tamper-proof QR code.
+  - Supports 1-click **Download as PDF**, **Download as PNG**, and direct **Plastic Card Printing**.
+- 📷 **Real-Time Camera QR Code Scanner**:
+  - Ultra-responsive 200ms camera scanner loop utilizing HTML5 Canvas and `jsQR`.
+  - Integrated across the Home page, Digital Voter ID Card page, and Polling Officer Station (`/qr-scanner`).
+  - Polling station check-in verification preventing duplicate ballot submissions.
+- 🦊 **MetaMask Ethereum Web3 Integration**:
+  - Direct Ethers.js v6 provider and signer integration with MetaMask.
+  - Dynamic navigation pill (`[ 🦊 Connect Wallet ]` / `[ 🦊 0x12...34 ]`) with auto-network detection (Sepolia / Local EVM).
+  - Dual-mode ballot submission: **⚡ Instant Cryptographic Relayer** or **🦊 Sign on Ethereum via MetaMask**.
 - 🛡️ **Dual Anti-Double-Voting Protection**:
   - On-chain wallet address mapping ensures each address can vote only once per election.
   - Keccak256 Aadhaar/National ID hash mapping prevents multi-wallet citizen duplication.
+- 🔍 **Independent On-Chain Vote Verifier**:
+  - Voters and auditors can verify cryptographic ballot inclusion without revealing individual candidate choices.
+  - Supports both database-relayed hashes and 66-character native Ethereum transaction hashes (`0x...`).
 - ✉️ **Secure Email Verification**:
   - Automated transactional verification tokens with time-limited expirations.
   - Development fallback using auto-generated Ethereal inboxes or production SMTP.
@@ -298,20 +321,22 @@ sequenceDiagram
 
 ## 🖼️ Web Application Interface Showcase
 
-EtherBallot implements a cyber-sovereign dark mode design system built with React 18, Vite, and custom glassmorphism. Below is a structured walkthrough of the 10 core application modules:
+> 📌 **Comprehensive Screenshot Catalog:** For full-resolution screenshots, component breakdowns, and visual walkthroughs of all interfaces, refer to [**SCREENSHOTS.md**](SCREENSHOTS.md).
 
-| Screen # | Interface Module | Application Route | Key UX & Cryptographic Features |
-|:---:|:---|:---|:---|
-| **01** | **Ecosystem Landing Page** | [`/`](http://localhost:5173/) | Live on-chain metrics, active election counters, smart contract gas tracker (Gwei), and sovereign emblem header |
-| **02** | **Voter Enrollment: Step 1 (Aadhaar)** | [`/register`](http://localhost:5173/register) | 12-digit citizen identification check, 256-bit SHA cryptographic hashing, and demo auto-fill for sandbox testing |
-| **03** | **Voter Enrollment: Step 2 (Constituency)** | [`/register`](http://localhost:5173/register) | Demographic registration form paired with browser GPS constituency jurisdiction detection |
-| **04** | **Email Verification Code Dispatch** | [`/register`](http://localhost:5173/register) & [`/login`](http://localhost:5173/login) | 6-digit verification code input with 5-minute expiry timer dispatched directly from `ehterballotproject@gmail.com` |
-| **05** | **Biometric Facial AI Scanner** | [`/login`](http://localhost:5173/login) & [`/register`](http://localhost:5173/register) | Live camera viewfinder with 128D neural facial vector extraction, Euclidean distance thresholding (<0.50), and liveness check |
-| **06** | **3-Factor Voter Sign-In Portal** | [`/login`](http://localhost:5173/login) | Multi-factor stepper: Aadhaar ID ➔ Email Verification Code ➔ Face AI Biometrics |
-| **07** | **Official Electronic Ballot Casting** | [`/vote`](http://localhost:5173/vote) | Candidate selection grid with political symbols, candidate avatars, and floating Web3 transaction signing bar |
-| **08** | **Cryptographic Ballot Receipt** | [`/vote`](http://localhost:5173/vote) | Permanent on-chain proof featuring block number, timestamp, and 32-byte Keccak-256 vote hash with copy action |
-| **09** | **Live Election Results & Analytics** | [`/results`](http://localhost:5173/results) | Real-time candidate vote share progress bars, hourly turnout charts, demographic breakdowns, and winner declaration |
-| **10** | **Super Admin Security Control Center** | [`/admin`](http://localhost:5173/admin/login) | Executive dashboard with state election commissioner controls, system nodes monitor, and append-only security audit logs |
+EtherBallot implements a cyber-sovereign design system built with React 18, Vite, and custom glassmorphism. Below is a structured walkthrough of the core application modules:
+
+| Screen # | Interface Module | Application Route | Credentials / Quick-Fill | Key UX & Cryptographic Features |
+|:---:|:---|:---|:---|:---|
+| **01** | **Ecosystem Landing Page** | [`/`](http://localhost:5173/) | Public Citizen | Live on-chain metrics, active election counters, Gwei gas monitor, MetaMask connect pill, Quick Service cards |
+| **02** | **Backend REST API** | [`/`](http://localhost:5000/) & [`/api/health`](http://localhost:5000/api/health) | Public / Bearer | JSON microservices overview, system health probe, active node environment |
+| **03** | **Official Admin Portal** | [`/admin/login`](http://localhost:5173/admin/login) | `superadmin` / `Admin@123456` | Chief Election Officer & State Admin sign-in, Role-Based Access Control |
+| **04** | **Admin Security Dashboard** | [`/admin`](http://localhost:5173/admin) | Logged-in Admin | Enrolled voter metrics, state-wise voter distribution, election creation, electoral roll management |
+| **05** | **3-Factor Voter Sign-In** | [`/login`](http://localhost:5173/login) | `EB-2026-000001` / `123456789012` | Dual-mode login (Aadhaar or 📷 QR Scanner) ➔ Email Verification Code ➔ Face AI Biometrics |
+| **06** | **Digital Voter ID (e-EPIC)**| [`/voter-card`](http://localhost:5173/voter-card) | Authenticated Elector | Official e-EPIC card, hologram, QR code, PDF/PNG export, print layout, assigned polling booth |
+| **07** | **Polling Officer QR Scanner**| [`/qr-scanner`](http://localhost:5173/qr-scanner) | Polling Officer | Real-time camera viewfinder, 200ms frame decode, duplicate check-in prevention, green/amber status |
+| **08** | **Electronic Ballot Casting** | [`/vote`](http://localhost:5173/vote) | Verified Elector | Candidate roster with party symbols, MetaMask on-chain signing, Instant Cryptographic Relayer |
+| **09** | **Cryptographic Ballot Receipt**| [`/vote`](http://localhost:5173/vote) | Verified Elector | Permanent on-chain proof featuring block number, timestamp, and 32-byte Keccak-256 vote hash with copy action |
+| **10** | **Live Results & Audit Center**| [`/results`](http://localhost:5173/results) | Public Citizen | Recharts vote distribution, candidate breakdown progress bars, winner banner, on-chain hash verifier |
 
 ---
 
